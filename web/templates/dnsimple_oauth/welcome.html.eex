@@ -1,0 +1,4 @@
+<div class="jumbotron">
+  <h2>This is your access token</h2>
+  <p class="lead"><%= token(@access_token) %></p>
+</div>

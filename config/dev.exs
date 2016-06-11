@@ -40,3 +40,7 @@ config :heroku_connector, HerokuConnector.Repo,
   database: "heroku_connector_dev",
   hostname: "localhost",
   pool_size: 10
+
+config :heroku_connector,
+  client_id: "9e0621f55ad7aec6",
+  client_secret: "oRnsTkiTK3J0t7lWuCb22gMpdhRdLLvX"
