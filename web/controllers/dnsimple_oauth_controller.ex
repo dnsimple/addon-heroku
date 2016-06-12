@@ -1,6 +1,8 @@
 defmodule HerokuConnector.DnsimpleOauthController do
   use HerokuConnector.Web, :controller
 
+  alias HerokuConnector.Account
+
   @state "12345678"
 
   def new(conn, _params) do
@@ -20,7 +22,20 @@ defmodule HerokuConnector.DnsimpleOauthController do
     }
     case Dnsimple.OauthService.exchange_authorization_for_token(client, attributes) do
       {:ok, response} ->
-        render conn, "welcome.html", access_token: response.data
+        access_token = response.data.access_token
+        client = %Dnsimple.Client{access_token: access_token}
+        case Dnsimple.IdentityService.whoami(client) do
+          {:ok, %Dnsimple.Response{data: data}} ->
+            account = Account.find_or_create!(Integer.to_string(data.account["id"]), %{
+              "dnsimple_account_email" => data.account["email"],
+              "dnsimple_access_token" => access_token
+            })
+
+            render conn, "welcome.html", account: account, access_token: access_token
+          {:error, error} ->
+            IO.inspect(error)
+            raise "Failed to retreive account details: #{inspect error}"
+        end
       {:error, error} ->
         IO.inspect(error)
         raise "OAuth authentication failed: #{inspect(error)}"
