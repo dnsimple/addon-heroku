@@ -31,14 +31,16 @@ defmodule HerokuConnector.DnsimpleOauthController do
               "dnsimple_access_token" => access_token
             })
 
-            render conn, "welcome.html", account: account, access_token: access_token
+            conn
+            |> put_session(:account_id, account.id)
+            |> render "welcome.html", account: account
           {:error, error} ->
             IO.inspect(error)
             raise "Failed to retreive account details: #{inspect error}"
         end
       {:error, error} ->
         IO.inspect(error)
-        raise "OAuth authentication failed: #{inspect(error)}"
+        raise "OAuth authentication failed: #{inspect error}"
     end
   end
 
