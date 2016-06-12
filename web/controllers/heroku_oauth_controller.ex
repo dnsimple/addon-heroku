@@ -35,7 +35,7 @@ defmodule HerokuConnector.HerokuOauthController do
         })
         Account.update!(changeset)
 
-        render conn, "welcome.html", access_token: access_token
+        render conn, "welcome.html", account: account
       {:error, error} ->
         IO.inspect(error)
         raise "OAuth authentication failed: #{inspect error}"

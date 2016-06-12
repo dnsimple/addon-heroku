@@ -1,4 +1,5 @@
 <div class="jumbotron">
   <h2>Connected to Heroku account</h2>
   <p class="lead"><%= @account.heroku_account_id %></p>
+  <%= link "Continue", to: page_path(@conn, :index) %>
 </div>
