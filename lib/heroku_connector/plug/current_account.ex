@@ -18,7 +18,7 @@ defmodule HerokuConnector.Plug.CurrentAccount do
             |> Phoenix.Controller.redirect(to: HerokuConnector.Router.Helpers.heroku_oauth_path(conn, :new))
             |> halt
           _ ->
-            assign(conn, :current_account, account)
+            assign(conn, :current_account, refresh_heroku_token(account))
         end
     end
   end
@@ -30,7 +30,7 @@ defmodule HerokuConnector.Plug.CurrentAccount do
     end
   end
 
-  def fetch_account(conn) do
+  defp fetch_account(conn) do
     case get_session(conn, :account_id) do
       nil -> nil
       account_id ->
@@ -39,5 +39,13 @@ defmodule HerokuConnector.Plug.CurrentAccount do
           account -> account
         end
     end
+  end
+
+  defp refresh_heroku_token(account) do
+    # TODO: check the expiration of the heroku access token
+    # if it is expired, get a new access token with the
+    # refresh token
+
+    account
   end
 end
