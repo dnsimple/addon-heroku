@@ -43,4 +43,6 @@ config :heroku_connector, HerokuConnector.Repo,
 
 config :heroku_connector,
   dnsimple_client_id: "9e0621f55ad7aec6",
-  dnsimple_client_secret: "oRnsTkiTK3J0t7lWuCb22gMpdhRdLLvX"
+  dnsimple_client_secret: "oRnsTkiTK3J0t7lWuCb22gMpdhRdLLvX",
+  heroku_client_id: "c0920219-7ef7-41f9-8645-d599db85b2a5",
+  heroku_client_secret: "f77ed12c-7126-4acc-9513-9143ebeae4e5"

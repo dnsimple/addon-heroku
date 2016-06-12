@@ -20,6 +20,9 @@ defmodule HerokuConnector.Router do
 
     get "/dnsimple/authorize", DnsimpleOauthController, :new
     get "/dnsimple/callback",  DnsimpleOauthController, :create
+
+    get "/heroku/authorize", HerokuOauthController, :new
+    get "/heroku/callback", HerokuOauthController, :create
   end
 
   # Other scopes may use custom stacks.
