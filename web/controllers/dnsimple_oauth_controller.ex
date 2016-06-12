@@ -5,7 +5,7 @@ defmodule HerokuConnector.DnsimpleOauthController do
 
   def new(conn, _params) do
     client    = %Dnsimple.Client{}
-    client_id = Application.fetch_env!(:heroku_connector, :client_id)
+    client_id = Application.fetch_env!(:heroku_connector, :dnsimple_client_id)
     oauth_url = Dnsimple.OauthService.authorize_url(client, client_id, state: @state)
     redirect(conn, external: oauth_url)
   end
@@ -13,8 +13,8 @@ defmodule HerokuConnector.DnsimpleOauthController do
   def create(conn, params) do
     client = %Dnsimple.Client{}
     attributes = %{
-      client_id: Application.fetch_env!(:heroku_connector, :client_id),
-      client_secret: Application.fetch_env!(:heroku_connector, :client_secret),
+      client_id: Application.fetch_env!(:heroku_connector, :dnsimple_client_id),
+      client_secret: Application.fetch_env!(:heroku_connector, :dnsimple_client_secret),
       code: params["code"],
       state: params["state"]
     }

@@ -42,5 +42,5 @@ config :heroku_connector, HerokuConnector.Repo,
   pool_size: 10
 
 config :heroku_connector,
-  client_id: "9e0621f55ad7aec6",
-  client_secret: "oRnsTkiTK3J0t7lWuCb22gMpdhRdLLvX"
+  dnsimple_client_id: "9e0621f55ad7aec6",
+  dnsimple_client_secret: "oRnsTkiTK3J0t7lWuCb22gMpdhRdLLvX"
