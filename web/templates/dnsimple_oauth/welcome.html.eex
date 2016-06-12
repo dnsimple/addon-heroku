@@ -1,4 +1,4 @@
 <div class="jumbotron">
-  <h2>Connect to DNSimple as</h2>
+  <h2>Connected to DNSimple as</h2>
   <p class="lead"><%= @account.dnsimple_account_email %></p>
 </div>
