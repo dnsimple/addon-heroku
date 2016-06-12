@@ -1,6 +1,8 @@
 defmodule HerokuConnector.Account do
   use HerokuConnector.Web, :model
 
+  alias HerokuConnector.Account
+
   schema "accounts" do
     field :email, :string
     field :dnsimple_access_token, :string
@@ -24,6 +26,20 @@ defmodule HerokuConnector.Account do
     account
     |> changeset(params)
     |> Repo.insert!
+  end
+
+  def find_or_create(email) do
+    case Repo.get_by(Account, email: email) do
+      nil -> create(%Account{email: email})
+      account -> {:ok, account}
+    end
+  end
+
+  def find_or_create!(email) do
+    case Repo.get_by(Account, email: email) do
+      nil -> create!(%Account{email: email})
+      account -> account
+    end
   end
 
   def changeset(account, params \\ :invalid) do

@@ -18,11 +18,25 @@ defmodule HerokuConnector.AccountTest do
   test "create with valid attributes" do
     {:ok, account} = Account.create(%Account{}, @valid_attrs) 
     assert account.email == @valid_attrs[:email]
+    assert Repo.get(Account, account.id) == account
   end
 
   test "create! with valid attributes" do
     account = Account.create!(%Account{}, @valid_attrs)
     assert account.email == @valid_attrs[:email]
+    assert Repo.get(Account, account.id) == account
+  end
+
+  test "find or create with valid email" do
+    {:ok, account} = Account.find_or_create(@valid_attrs[:email])
+    assert account.email == @valid_attrs[:email]
+    assert Repo.get(Account, account.id) == account
+  end
+
+  test "find or create! with valid email" do
+    account = Account.find_or_create!(@valid_attrs[:email])
+    assert account.email == @valid_attrs[:email]
+    assert Repo.get(Account, account.id) == account
   end
 
   test "update with valid attributes" do
