@@ -1,0 +1,29 @@
+<h2>Listing connections</h2>
+
+<table class="table">
+  <thead>
+    <tr>
+      <th>Account</th>
+      <th>Dnsimple domain</th>
+      <th>Heroku app</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+<%= for connection <- @connections do %>
+    <tr>
+      <td><%= connection.account_id %></td>
+      <td><%= connection.dnsimple_domain_id %></td>
+      <td><%= connection.heroku_app_id %></td>
+
+      <td class="text-right">
+        <%= link "Show", to: connection_path(@conn, :show, connection), class: "btn btn-default btn-xs" %>
+        <%= link "Edit", to: connection_path(@conn, :edit, connection), class: "btn btn-default btn-xs" %>
+        <%= link "Delete", to: connection_path(@conn, :delete, connection), method: :delete, data: [confirm: "Are you sure?"], class: "btn btn-danger btn-xs" %>
+      </td>
+    </tr>
+<% end %>
+  </tbody>
+</table>
+
+<%= link "New connection", to: connection_path(@conn, :new) %>

@@ -1,8 +1,8 @@
-<h2>New connector</h2>
+<h2>Edit connection</h2>
 
 <%= render "form.html", changeset: @changeset,
                         dnsimple_domains: @dnsimple_domains,
                         heroku_apps: @heroku_apps,
-                        action: connector_path(@conn, :create) %>
+                        action: connection_path(@conn, :update, @connection) %>
 
-<%= link "Back", to: connector_path(@conn, :index) %>
+<%= link "Back", to: connection_path(@conn, :index) %>

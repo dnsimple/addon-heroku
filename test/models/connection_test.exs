@@ -1,7 +1,7 @@
-defmodule HerokuConnector.ConnectorTest do
+defmodule HerokuConnector.ConnectionTest do
   use HerokuConnector.ModelCase
 
-  alias HerokuConnector.Connector
+  alias HerokuConnector.Connection
   alias HerokuConnector.Account
 
   @valid_attrs %{dnsimple_domain_id: "123", heroku_app_id: "ABC"}
@@ -14,12 +14,12 @@ defmodule HerokuConnector.ConnectorTest do
   end
 
   test "changeset with valid attributes", %{account: account} do
-    changeset = Connector.changeset(%Connector{account_id: account.id}, @valid_attrs)
+    changeset = Connection.changeset(%Connection{account_id: account.id}, @valid_attrs)
     assert changeset.valid?
   end
 
   test "changeset with invalid attributes", %{account: account} do
-    changeset = Connector.changeset(%Connector{account_id: account.id}, @invalid_attrs)
+    changeset = Connection.changeset(%Connection{account_id: account.id}, @invalid_attrs)
     refute changeset.valid?
   end
 end

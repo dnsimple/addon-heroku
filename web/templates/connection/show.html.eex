@@ -1,0 +1,18 @@
+<h2>Show connection</h2>
+
+<ul>
+
+  <li>
+    <strong>Dnsimple domain:</strong>
+    <%= @connection.dnsimple_domain_id %>
+  </li>
+
+  <li>
+    <strong>Heroku app:</strong>
+    <%= @connection.heroku_app_id %>
+  </li>
+
+</ul>
+
+<%= link "Edit", to: connection_path(@conn, :edit, @connection) %>
+<%= link "Back", to: connection_path(@conn, :index) %>

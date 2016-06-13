@@ -1,4 +1,4 @@
-defmodule HerokuConnector.Connector do
+defmodule HerokuConnector.Connection do
 
   defmodule Configuration do
     use Ecto.Schema
@@ -10,9 +10,9 @@ defmodule HerokuConnector.Connector do
   use HerokuConnector.Web, :model
   import Ecto.Query, only: [from: 2]
 
-  alias HerokuConnector.Connector
+  alias HerokuConnector.Connection
 
-  schema "connectors" do
+  schema "connections" do
     belongs_to :account, HerokuConnector.Account
     field :dnsimple_domain_id, :string
     field :heroku_app_id, :string
@@ -37,17 +37,17 @@ defmodule HerokuConnector.Connector do
   end
 
   def get(account, id) do
-    query = from c in Connector, where: c.account_id == ^account.id
+    query = from c in Connection, where: c.account_id == ^account.id
     Repo.get(query, id)
   end
 
   def get!(account, id) do
-    query = from c in Connector, where: c.account_id == ^account.id
+    query = from c in Connection, where: c.account_id == ^account.id
     Repo.get!(query, id)
   end
 
   def all(account) do
-    query = from c in Connector, where: c.account_id == ^account.id
+    query = from c in Connection, where: c.account_id == ^account.id
     Repo.all(query)
   end
 
