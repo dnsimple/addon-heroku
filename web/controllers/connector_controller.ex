@@ -59,12 +59,9 @@ defmodule HerokuConnector.ConnectorController do
   end
 
   def delete(conn, %{"id" => id}) do
-    account = conn.assigns[:current_account]
-    connector = Connector.get!(account, id)
-
-    # Here we use delete! (with a bang) because we expect
-    # it to always work (and if it does not, it will raise).
-    Connector.delete!(connector)
+    conn.assigns[:current_account]
+    |> Connector.get!(id)
+    |> Connector.delete!
 
     conn
     |> put_flash(:info, "Connector deleted successfully.")
