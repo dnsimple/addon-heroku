@@ -9,6 +9,8 @@ defmodule HerokuConnector.Connector do
 
   use HerokuConnector.Web, :model
 
+  alias HerokuConnector.Connector
+
   schema "connectors" do
     belongs_to :account, HerokuConnector.Account
     field :dnsimple_domain_id, :string
@@ -21,6 +23,26 @@ defmodule HerokuConnector.Connector do
   @required_fields ~w(account_id dnsimple_domain_id heroku_app_id)
   @optional_fields ~w()
 
+  def create(model, params \\ %{}) do
+    model
+    |> changeset(params)
+    |> Repo.insert
+  end
+
+  def create!(model, params \\ %{}) do
+    model
+    |> changeset(params)
+    |> Repo.insert!
+  end
+
+  def get(id) do
+    Repo.get(Connector, id)
+  end
+
+  def get!(id) do
+    Repo.get!(Connector, id)
+  end
+
   @doc """
   Creates a changeset based on the `model` and `params`.
 
@@ -30,5 +52,21 @@ defmodule HerokuConnector.Connector do
   def changeset(model, params \\ :invalid) do
     model
     |> cast(params, @required_fields, @optional_fields)
+  end
+
+  def update(changeset) do
+    Repo.update(changeset)
+  end
+
+  def update!(changeset) do
+    Repo.update!(changeset)
+  end
+
+  def delete(model) do
+    Repo.delete(model)
+  end
+
+  def delete!(model) do
+    Repo.delete!(model)
   end
 end
