@@ -1,6 +1,5 @@
 defmodule HerokuConnector.Plug.CurrentAccount do
   import Plug.Conn
-  use Timex
   require Logger
 
   alias HerokuConnector.Account
@@ -20,7 +19,7 @@ defmodule HerokuConnector.Plug.CurrentAccount do
             |> Phoenix.Controller.redirect(to: HerokuConnector.Router.Helpers.heroku_oauth_path(conn, :new))
             |> halt
           _ ->
-            assign(conn, :current_account, refresh_account_heroku_token(account))
+            assign(conn, :current_account, HerokuConnector.Heroku.refresh_access_token(account))
         end
     end
   end
@@ -41,24 +40,5 @@ defmodule HerokuConnector.Plug.CurrentAccount do
           account -> account
         end
     end
-  end
-
-  defp refresh_account_heroku_token(account) do
-    if account.heroku_access_token_expires_at != nil and Timex.after?(DateTime.now, account.heroku_access_token_expires_at) do
-      case OAuth2.Client.get_token(HerokuConnector.Heroku.oauth_client(OAuth2.Strategy.Refresh), refresh_token: account.heroku_refresh_token) do
-        {:ok, response} ->
-          changeset = Account.changeset(account, %{
-            "heroku_access_token" => response.access_token,
-            "heroku_access_token_expires_at" => DateTime.from_seconds(response.expires_at),
-            "heroku_refresh_token" => response.refresh_token
-          })
-          account = Account.update!(changeset)
-        {:error, error} ->
-          IO.inspect(error)
-          raise "OAuth token refresh failed: #{inspect error}"
-      end
-    end
-
-    account
   end
 end
