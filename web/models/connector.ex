@@ -8,6 +8,7 @@ defmodule HerokuConnector.Connector do
   end
 
   use HerokuConnector.Web, :model
+  import Ecto.Query, only: [from: 2]
 
   alias HerokuConnector.Connector
 
@@ -35,16 +36,19 @@ defmodule HerokuConnector.Connector do
     |> Repo.insert!
   end
 
-  def get(id) do
-    Repo.get(Connector, id)
+  def get(account, id) do
+    query = from c in Connector, where: c.account_id == ^account.id
+    Repo.get(query, id)
   end
 
-  def get!(id) do
-    Repo.get!(Connector, id)
+  def get!(account, id) do
+    query = from c in Connector, where: c.account_id == ^account.id
+    Repo.get!(query, id)
   end
 
-  def all do
-    Repo.all(Connector)
+  def all(account) do
+    query = from c in Connector, where: c.account_id == ^account.id
+    Repo.all(query)
   end
 
   @doc """

@@ -35,7 +35,7 @@ defmodule HerokuConnector.ConnectorControllerTest do
   end
 
   test "shows chosen resource", %{conn: conn, account: account} do
-    connector = Repo.insert! %Connector{}
+    connector = Repo.insert! %Connector{account_id: account.id}
     conn = conn |> assign(:current_account, account) |> get(connector_path(conn, :show, connector))
     assert html_response(conn, 200) =~ "Show connector"
   end
@@ -47,7 +47,7 @@ defmodule HerokuConnector.ConnectorControllerTest do
   end
 
   test "renders form for editing chosen resource", %{conn: conn, account: account} do
-    connector = Repo.insert! %Connector{}
+    connector = Repo.insert! %Connector{account_id: account.id}
     conn = conn |> assign(:current_account, account) |> get(connector_path(conn, :edit, connector))
     assert html_response(conn, 200) =~ "Edit connector"
   end
@@ -60,13 +60,13 @@ defmodule HerokuConnector.ConnectorControllerTest do
   end
 
   test "does not update chosen resource and renders errors when data is invalid", %{conn: conn, account: account} do
-    connector = Repo.insert! %Connector{}
+    connector = Repo.insert! %Connector{account_id: account.id}
     conn = conn |> assign(:current_account, account) |> put(connector_path(conn, :update, connector), connector: @invalid_attrs)
     assert html_response(conn, 200) =~ "Edit connector"
   end
 
   test "deletes chosen resource", %{conn: conn, account: account} do
-    connector = Repo.insert! %Connector{}
+    connector = Repo.insert! %Connector{account_id: account.id}
     conn =  conn |> assign(:current_account, account) |> delete(connector_path(conn, :delete, connector))
     assert redirected_to(conn) == connector_path(conn, :index)
     refute Repo.get(Connector, connector.id)
