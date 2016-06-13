@@ -6,7 +6,6 @@
       <th>Account</th>
       <th>Dnsimple domain</th>
       <th>Heroku app</th>
-      <th>Configuration</th>
 
       <th></th>
     </tr>
@@ -17,7 +16,6 @@
       <td><%= connector.account_id %></td>
       <td><%= connector.dnsimple_domain_id %></td>
       <td><%= connector.heroku_app_id %></td>
-      <td><%= connector.configuration %></td>
 
       <td class="text-right">
         <%= link "Show", to: connector_path(@conn, :show, connector), class: "btn btn-default btn-xs" %>

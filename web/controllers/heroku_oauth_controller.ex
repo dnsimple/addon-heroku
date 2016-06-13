@@ -40,19 +40,10 @@ defmodule HerokuConnector.HerokuOauthController do
         IO.inspect(error)
         raise "OAuth authentication failed: #{inspect error}"
     end
-    
   end
 
   defp client do
-    OAuth2.Client.new([
-      strategy: OAuth2.Strategy.AuthCode,
-      client_id: Application.fetch_env!(:heroku_connector, :heroku_client_id),
-      client_secret: Application.fetch_env!(:heroku_connector, :heroku_client_secret),
-      site: "https://heroku.com",
-      redirect_uri: "http://localhost:4000/heroku/callback",
-      authorize_url: "https://id.heroku.com/oauth/authorize",
-      token_url: "https://id.heroku.com/oauth/token"
-    ])
+    HerokuConnector.Heroku.oauth_client
   end
 
 end

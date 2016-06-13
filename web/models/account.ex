@@ -9,7 +9,7 @@ defmodule HerokuConnector.Account do
     field :dnsimple_access_token, :string
     field :heroku_account_id, :string
     field :heroku_access_token, :string
-    field :heroku_access_token_expires_at, Ecto.DateTime
+    field :heroku_access_token_expires_at, Timex.Ecto.DateTime
     field :heroku_refresh_token, :string
 
     timestamps

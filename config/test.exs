@@ -17,3 +17,8 @@ config :heroku_connector, HerokuConnector.Repo,
   database: "heroku_connector_test",
   hostname: "localhost",
   pool: Ecto.Adapters.SQL.Sandbox
+
+config :heroku_connector,
+  dnsimple_domains_service: HerokuConnector.Dnsimple.DomainsServiceMock,
+  heroku_apps_service: HerokuConnector.Heroku.AppsServiceMock
+

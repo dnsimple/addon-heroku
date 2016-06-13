@@ -7,13 +7,13 @@
 
   <div class="form-group">
     <%= label f, :dnsimple_domain_id, class: "control-label" %>
-    <%= select f, :dnsimple_domain_id, ["example.com": "example.com"], class: "form-control" %>
+    <%= select f, :dnsimple_domain_id, domain_select_options(@dnsimple_domains), class: "form-control" %>
     <%= error_tag f, :dnsimple_domain_id %>
   </div>
 
   <div class="form-group">
     <%= label f, :heroku_app_id, class: "control-label" %>
-    <%= select f, :heroku_app_id, ["Example App": "123-ABC"], class: "form-control" %>
+    <%= select f, :heroku_app_id, app_select_options(@heroku_apps), class: "form-control" %>
     <%= error_tag f, :heroku_app_id %>
   </div>
 

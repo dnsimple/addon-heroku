@@ -1,6 +1,8 @@
 <h2>New connector</h2>
 
 <%= render "form.html", changeset: @changeset,
+                        dnsimple_domains: @dnsimple_domains,
+                        heroku_apps: @heroku_apps,
                         action: connector_path(@conn, :create) %>
 
 <%= link "Back", to: connector_path(@conn, :index) %>
