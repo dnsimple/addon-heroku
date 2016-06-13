@@ -17,6 +17,9 @@ defmodule HerokuConnector.ErrorHelpers do
   @doc """
   Translates an error message using gettext.
   """
+  def translate_error({msg, []}) do
+    Gettext.dgettext(HerokuConnector.Gettext, "errors", msg)
+  end
   def translate_error({msg, opts}) do
     # Because error messages were defined within Ecto, we must
     # call the Gettext module passing our Gettext backend. We
@@ -26,10 +29,6 @@ defmodule HerokuConnector.ErrorHelpers do
     #
     #     dngettext "errors", "1 file", "%{count} files", count
     #
-    Gettext.dngettext(HerokuConnector.Gettext, "errors", msg, msg, opts[:count], opts)
-  end
-
-  def translate_error(msg) do
-    Gettext.dgettext(HerokuConnector.Gettext, "errors", msg)
+    Gettext.dngettext(HerokuConnector.Gettext, "errors", msg, msg, opts[:count] || 1, opts)
   end
 end

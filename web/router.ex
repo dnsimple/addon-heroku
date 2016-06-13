@@ -23,6 +23,8 @@ defmodule HerokuConnector.Router do
 
     get "/heroku/authorize", HerokuOauthController, :new
     get "/heroku/callback", HerokuOauthController, :create
+
+    resources "/connectors", ConnectorController
   end
 
   # Other scopes may use custom stacks.

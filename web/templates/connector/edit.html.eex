@@ -1,0 +1,6 @@
+<h2>Edit connector</h2>
+
+<%= render "form.html", changeset: @changeset,
+                        action: connector_path(@conn, :update, @connector) %>
+
+<%= link "Back", to: connector_path(@conn, :index) %>
