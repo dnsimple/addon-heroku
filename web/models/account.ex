@@ -18,14 +18,14 @@ defmodule HerokuConnector.Account do
   @required_fields ~w(dnsimple_account_id)
   @optional_fields ~w(dnsimple_account_email dnsimple_access_token heroku_account_id heroku_access_token heroku_access_token_expires_at heroku_refresh_token)
 
-  def create(account, params \\ %{}) do
-    account
+  def create(model, params \\ %{}) do
+    model
     |> changeset(params)
     |> Repo.insert
   end
 
-  def create!(account, params \\ %{}) do
-    account
+  def create!(model, params \\ %{}) do
+    model
     |> changeset(params)
     |> Repo.insert!
   end
@@ -52,8 +52,8 @@ defmodule HerokuConnector.Account do
     end
   end
 
-  def changeset(account, params \\ :invalid) do
-    account
+  def changeset(model, params \\ :invalid) do
+    model
     |> cast(params, @required_fields, @optional_fields)
   end
 
@@ -65,7 +65,7 @@ defmodule HerokuConnector.Account do
     Repo.update!(changeset)
   end
 
-  def delete(account) do
-    Repo.delete(account)
+  def delete(model) do
+    Repo.delete(model)
   end
 end
