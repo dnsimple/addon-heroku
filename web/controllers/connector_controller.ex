@@ -12,16 +12,13 @@ defmodule HerokuConnector.ConnectorController do
   end
 
   def new(conn, _params) do
-    changeset = Connector.changeset(%Connector{})
-
     account = conn.assigns[:current_account]
-    dnsimple_domains = HerokuConnector.Dnsimple.domains(account)
-    heroku_apps = HerokuConnector.Heroku.apps(account)
-
-    render(conn, "new.html", changeset: changeset, dnsimple_domains: dnsimple_domains, heroku_apps: heroku_apps)
+    changeset = Connector.changeset(%Connector{})
+    render(conn, "new.html", changeset: changeset, dnsimple_domains: HerokuConnector.Dnsimple.domains(account), heroku_apps: HerokuConnector.Heroku.apps(account))
   end
 
   def create(conn, %{"connector" => connector_params}) do
+    account = conn.assigns[:current_account]
     changeset = Connector.changeset(%Connector{account_id: conn.assigns[:current_account].id}, connector_params)
 
     case Repo.insert(changeset) do
@@ -30,7 +27,7 @@ defmodule HerokuConnector.ConnectorController do
         |> put_flash(:info, "Connector created successfully.")
         |> redirect(to: connector_path(conn, :index))
       {:error, changeset} ->
-        render(conn, "new.html", changeset: changeset, dnsimple_domains: [], heroku_apps: [])
+        render(conn, "new.html", changeset: changeset, dnsimple_domains: HerokuConnector.Dnsimple.domains(account), heroku_apps: HerokuConnector.Heroku.apps(account))
     end
   end
 
@@ -40,12 +37,14 @@ defmodule HerokuConnector.ConnectorController do
   end
 
   def edit(conn, %{"id" => id}) do
+    account = conn.assigns[:current_account]
     connector = Repo.get!(Connector, id)
     changeset = Connector.changeset(connector)
-    render(conn, "edit.html", connector: connector, changeset: changeset, dnsimple_domains: [], heroku_apps: [])
+    render(conn, "edit.html", connector: connector, changeset: changeset, dnsimple_domains: HerokuConnector.Dnsimple.domains(account), heroku_apps: HerokuConnector.Heroku.apps(account))
   end
 
   def update(conn, %{"id" => id, "connector" => connector_params}) do
+    account = conn.assigns[:current_account]
     connector = Repo.get!(Connector, id)
     changeset = Connector.changeset(connector, connector_params)
 
@@ -55,7 +54,7 @@ defmodule HerokuConnector.ConnectorController do
         |> put_flash(:info, "Connector updated successfully.")
         |> redirect(to: connector_path(conn, :show, connector))
       {:error, changeset} ->
-        render(conn, "edit.html", connector: connector, changeset: changeset, dnsimple_domains: [], heroku_apps: [])
+        render(conn, "edit.html", connector: connector, changeset: changeset, dnsimple_domains: HerokuConnector.Dnsimple.domains(account), heroku_apps: HerokuConnector.Heroku.apps(account))
     end
   end
 
