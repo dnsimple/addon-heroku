@@ -77,4 +77,24 @@ defmodule HerokuConnector.Connection do
   def delete!(model) do
     Repo.delete!(model)
   end
+
+  @doc """
+  Execute the connection at DNSimple and Heroku.
+  """
+  def connect(model) do
+    model = Repo.preload(model, :account)
+
+    domain = HerokuConnector.Dnsimple.domain(model.account, model.dnsimple_domain_id)
+    app = HerokuConnector.Heroku.app(model.account, model.heroku_app_id)
+    uri = URI.parse(app.web_url)
+
+    records = IO.inspect [
+      %Dnsimple.Record{type: "ALIAS", name: "", content: uri.host, ttl: 3600},
+      %Dnsimple.Record{type: "CNAME", name: "www", content: uri.host, ttl: 3600}
+    ]
+
+    IO.inspect(HerokuConnector.Dnsimple.create_records(model.account, domain.name, records))
+
+    {:ok, model}
+  end
 end

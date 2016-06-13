@@ -3,6 +3,36 @@ defmodule HerokuConnector.Heroku do
 
   alias HerokuConnector.Account
 
+  # Functions to get Heroku data.
+
+  @doc """
+  Get all Heroku apps for the given `account`.
+  """
+  def apps(account) do
+    app_service.list(client(account))
+  end
+
+  @doc """
+  Get the application from the `account` with the given `app_id`.
+  """
+  def app(account, app_id) do
+    app_service.get(client(account), app_id)
+  end
+
+  @doc """
+  Get the client for the given account.
+  """
+  def client(account) do
+    Happi.api_client(api_key: account.heroku_access_token)
+  end
+
+  defp app_service do
+    Application.get_env(:heroku_connector, :heroku_apps_service, Happi.Heroku.App)
+  end
+
+
+  # OAuth2 functionality
+
   def oauth_client(strategy \\ OAuth2.Strategy.AuthCode) do
     OAuth2.Client.new([
       strategy: strategy,
@@ -39,18 +69,6 @@ defmodule HerokuConnector.Heroku do
         IO.inspect(error)
         raise "OAuth token refresh failed: #{inspect error}"
     end
-  end
-
-  def apps(account) do
-    app_service.list(client(account))
-  end
-
-  def client(account) do
-    Happi.api_client(api_key: account.heroku_access_token)
-  end
-
-  defp app_service do
-    Application.get_env(:heroku_connector, :heroku_apps_service, Happi.Heroku.App)
   end
 
 end
