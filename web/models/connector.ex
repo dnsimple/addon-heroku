@@ -43,6 +43,10 @@ defmodule HerokuConnector.Connector do
     Repo.get!(Connector, id)
   end
 
+  def all do
+    Repo.all(Connector)
+  end
+
   @doc """
   Creates a changeset based on the `model` and `params`.
 

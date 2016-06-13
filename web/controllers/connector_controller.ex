@@ -7,7 +7,7 @@ defmodule HerokuConnector.ConnectorController do
   plug :scrub_params, "connector" when action in [:create, :update]
 
   def index(conn, _params) do
-    connectors = Repo.all(Connector)
+    connectors = Connector.all
     render(conn, "index.html", connectors: connectors)
   end
 
