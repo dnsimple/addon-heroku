@@ -1,6 +1,6 @@
 defmodule HerokuConnector.Dnsimple do
   def domains(account) do
-    dnsimple_domains = case domain_service.domains(client(account), account.id) do
+    case domain_service.domains(client(account), account.id) do
       {:ok, response} -> response.data
       {:error, error} ->
         IO.inspect(error)
@@ -9,7 +9,7 @@ defmodule HerokuConnector.Dnsimple do
   end
 
   def domain(account, id) do
-    dnsimple_domain = case domain_service.domain(client(account), account.id, id) do
+    case domain_service.domain(client(account), account.id, id) do
       {:ok, response} -> response.data
       {:error, error} ->
         IO.inspect(error)
@@ -21,6 +21,12 @@ defmodule HerokuConnector.Dnsimple do
     c = client(account)
     zs = zone_service
     Enum.map(records, &(zs.create_record(c, account.id, zone_name, &1)))
+  end
+
+  def delete_records(account, zone_name, record_ids) do
+    c = client(account)
+    zs = zone_service
+    Enum.map(record_ids, &(zs.delete_record(c, account.id, zone_name, &1)))
   end
 
   def client(account) do

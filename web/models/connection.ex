@@ -7,8 +7,18 @@ defmodule HerokuConnector.Connection do
     end
   end
 
+  defmodule ConnectionData do
+    use Ecto.Schema
+
+    embedded_schema do
+      field :dnsimple_record_ids, {:array, :integer}, default: []
+      field :heroku_domain_ids, {:array, :string}, default: []
+    end
+  end
+
   use HerokuConnector.Web, :model
   import Ecto.Query, only: [from: 2]
+  require Logger
 
   alias HerokuConnector.Connection
 
@@ -16,7 +26,8 @@ defmodule HerokuConnector.Connection do
     belongs_to :account, HerokuConnector.Account
     field :dnsimple_domain_id, :string
     field :heroku_app_id, :string
-    embeds_one :configuration, HerokuConnector.Connector.Configuration, on_replace: :delete
+    embeds_one :configuration, HerokuConnector.Connection.Configuration, on_replace: :delete
+    embeds_one :connection_data, HerokuConnector.Connection.ConnectionData, on_replace: :delete
 
     timestamps
   end
@@ -81,20 +92,48 @@ defmodule HerokuConnector.Connection do
   @doc """
   Execute the connection at DNSimple and Heroku.
   """
-  def connect(model) do
+  def connect!(model) do
     model = Repo.preload(model, :account)
 
     domain = HerokuConnector.Dnsimple.domain(model.account, model.dnsimple_domain_id)
     app = HerokuConnector.Heroku.app(model.account, model.heroku_app_id)
     uri = URI.parse(app.web_url)
 
-    records = IO.inspect [
+    records = [
       %Dnsimple.Record{type: "ALIAS", name: "", content: uri.host, ttl: 3600},
       %Dnsimple.Record{type: "CNAME", name: "www", content: uri.host, ttl: 3600}
     ]
 
-    IO.inspect(HerokuConnector.Dnsimple.create_records(model.account, domain.name, records))
+    create_records_results = HerokuConnector.Dnsimple.create_records(model.account, domain.name, records)
+    record_ids = Enum.filter(Enum.map(create_records_results, fn(result) ->
+      case result do
+        {:ok, response} ->
+          response.data.id
+        {:error, error} ->
+          Logger.error("Error adding record: #{inspect error}")
+          nil
+      end
+    end), &(&1))
 
-    {:ok, model}
+    connection_data = %ConnectionData{dnsimple_record_ids: record_ids}
+
+    changeset = model
+    |> change
+    |> put_embed(:connection_data, connection_data)
+
+    update(changeset)
+
+    model
+  end
+
+  def disconnect!(model) do
+    model = Repo.preload(model, :account)
+
+    domain = HerokuConnector.Dnsimple.domain(model.account, model.dnsimple_domain_id)
+    _app = HerokuConnector.Heroku.app(model.account, model.heroku_app_id)
+
+    HerokuConnector.Dnsimple.delete_records(model.account, domain.name, model.connection_data.dnsimple_record_ids)
+
+    model
   end
 end

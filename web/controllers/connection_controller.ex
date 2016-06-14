@@ -22,15 +22,10 @@ defmodule HerokuConnector.ConnectionController do
     account = conn.assigns[:current_account]
     case Connection.create(%Connection{account_id: conn.assigns[:current_account].id}, connection_params) do
       {:ok, connection} ->
-        case Connection.connect(connection) do
-          {:ok, connection} ->
-            conn
-            |> put_flash(:info, "Connector created successfully.")
-            |> redirect(to: connection_path(conn, :index))
-          {:error, error} ->
-            IO.inspect(error)
-            raise "Failed to establish connection: #{inspect error}"
-        end
+        Connection.connect!(connection)
+        conn
+        |> put_flash(:info, "Connector created successfully.")
+        |> redirect(to: connection_path(conn, :index))
       {:error, changeset} ->
         render(conn, "new.html", changeset: changeset, dnsimple_domains: HerokuConnector.Dnsimple.domains(account), heroku_apps: HerokuConnector.Heroku.apps(account))
     end
@@ -67,6 +62,7 @@ defmodule HerokuConnector.ConnectionController do
   def delete(conn, %{"id" => id}) do
     conn.assigns[:current_account]
     |> Connection.get!(id)
+    |> Connection.disconnect!
     |> Connection.delete!
 
     conn

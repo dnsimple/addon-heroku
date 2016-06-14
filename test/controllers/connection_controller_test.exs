@@ -2,6 +2,7 @@ defmodule HerokuConnector.ConnectionControllerTest do
   use HerokuConnector.ConnCase
 
   alias HerokuConnector.Connection
+  alias HerokuConnector.Connection.ConnectionData
   alias HerokuConnector.Account
 
   @valid_attrs %{dnsimple_domain_id: "123", heroku_app_id: "ABC"}
@@ -66,7 +67,7 @@ defmodule HerokuConnector.ConnectionControllerTest do
   end
 
   test "deletes chosen resource", %{conn: conn, account: account} do
-    connection = Repo.insert! %Connection{account_id: account.id}
+    connection = Repo.insert! %Connection{account_id: account.id, connection_data: %ConnectionData{}}
     conn =  conn |> assign(:current_account, account) |> delete(connection_path(conn, :delete, connection))
     assert redirected_to(conn) == connection_path(conn, :index)
     refute Repo.get(Connection, connection.id)
