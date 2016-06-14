@@ -101,20 +101,59 @@ defmodule HerokuConnector.Connection do
     dnsimple_connect_results = connect_dnsimple(model.account, domain.name, URI.parse(app.web_url).host)
     heroku_connect_results = connect_heroku(model.account, domain.name, app.id)
 
-    # Function returning true if the result tuple first element is :ok
-    success_fn = fn(res) ->
-      case res do
-        {:ok, _} -> true
-        {:error, _} -> false
-      end
+    save_connection_data(model, dnsimple_connect_results, heroku_connect_results)
+
+    case Enum.all?(dnsimple_connect_results ++ heroku_connect_results, success_fn) do
+      true ->
+        {:ok, model}
+      false ->
+        get!(model.account, model.id) |> disconnect! |> delete!
+        {:error, dnsimple_connect_results ++ heroku_connect_results}
+    end
+  end
+
+  @doc """
+  Reconnect the connection using the changes in the `changeset`.
+
+  If either the heroku app or the DNSimple domain change, then both must be
+  disconnected and connected.
+  """
+  def reconnect(changeset) do
+    model = changeset.data |> Repo.preload(:account)
+    domain = HerokuConnector.Dnsimple.domain(model.account, model.dnsimple_domain_id)
+    app = HerokuConnector.Heroku.app(model.account, model.heroku_app_id)
+    new_domain = case Map.get(changeset.changes, :dnsimple_domain_id) do
+      nil -> domain
+      dnsimple_domain_id ->  HerokuConnector.Dnsimple.domain(model.account, dnsimple_domain_id)
+    end
+    new_app = case Map.get(changeset.changes, :heroku_app_id) do
+      nil -> app
+      heroku_app_id ->  HerokuConnector.Heroku.app(model.account, heroku_app_id)
     end
 
-    # Function to use in filters for removing nil values
-    non_nil_fn = &(&1 != nil)
+    case domain.id != new_domain.id or app.id != new_app.id do
+      true ->
+        dnsimple_connect_results = reconnect_dnsimple(model, domain, app, new_domain, new_app)
+        heroku_connect_results = reconnect_heroku(model, domain, app, new_domain, new_app)
 
-    # Function to extract the ID from the result tuple {:ok, id}
-    extract_id_fn = fn({:ok, id}) -> id end
+        save_connection_data(model, dnsimple_connect_results, heroku_connect_results)
+        {:ok, dnsimple_connect_results ++ heroku_connect_results}
+      false ->
+        {:ok, []}
+    end
+  end
 
+  defp reconnect_dnsimple(model, domain, _app, new_domain, new_app) do
+    disconnect_dnsimple!(model.account, domain.name, model.connection_data.dnsimple_record_ids)
+    connect_dnsimple(model.account, new_domain.name, URI.parse(new_app.web_url).host)
+  end
+
+  defp reconnect_heroku(model, _domain, app, new_domain, new_app) do
+    disconnect_heroku!(model.account, app.id, model.connection_data.heroku_domain_ids)
+    connect_heroku(model.account, new_domain.name, new_app.id)
+  end
+
+  defp save_connection_data(model, dnsimple_connect_results, heroku_connect_results) do
     # Currently there is a behavior in the DNSimple API where record creation fails but the
     # endpoint returns a 201 with nil ids in the records that are returned. The second filter
     # in the chain below filters out those nil ids.
@@ -129,13 +168,6 @@ defmodule HerokuConnector.Connection do
     |> put_embed(:connection_data, connection_data)
     |> update
 
-    case Enum.all?(dnsimple_connect_results ++ heroku_connect_results, success_fn) do
-      true ->
-        {:ok, model}
-      false ->
-        get!(model.account, model.id) |> disconnect! |> delete!
-        {:error, dnsimple_connect_results ++ heroku_connect_results}
-    end
   end
 
   defp dnsimple_records(app_hostname) do
@@ -191,4 +223,17 @@ defmodule HerokuConnector.Connection do
   defp disconnect_heroku!(account, app_id, heroku_domain_ids) do
     HerokuConnector.Heroku.delete_domains(account, app_id, heroku_domain_ids)
   end
+
+  defp success_fn do
+    fn(res) ->
+      case res do
+        {:ok, _} -> true
+        {:error, _} -> false
+      end
+    end
+  end
+
+  defp non_nil_fn, do: &(&1 != nil)
+
+  defp extract_id_fn, do: fn({:ok, id}) -> id end
 end

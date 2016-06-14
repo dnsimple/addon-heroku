@@ -56,12 +56,17 @@ defmodule HerokuConnector.ConnectionController do
     connection = Connection.get!(account, id)
     changeset = Connection.changeset(connection, connection_params)
 
-    case Connection.update(changeset) do
-      {:ok, connection} ->
-        conn
-        |> put_flash(:info, "Connection updated successfully.")
-        |> redirect(to: connection_path(conn, :show, connection))
-      {:error, changeset} ->
+    case Connection.reconnect(changeset) do
+      {:ok, _} ->
+        case Connection.update(changeset) do
+          {:ok, new_connection} ->
+            conn
+            |> put_flash(:info, "Connection updated successfully.")
+            |> redirect(to: connection_path(conn, :show, new_connection))
+          {:error, changeset} ->
+            render(conn, "edit.html", connection: connection, changeset: changeset, dnsimple_domains: HerokuConnector.Dnsimple.domains(account), heroku_apps: HerokuConnector.Heroku.apps(account))
+        end
+      {:error, _} ->
         render(conn, "edit.html", connection: connection, changeset: changeset, dnsimple_domains: HerokuConnector.Dnsimple.domains(account), heroku_apps: HerokuConnector.Heroku.apps(account))
     end
   end

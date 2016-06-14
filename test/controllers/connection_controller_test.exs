@@ -54,14 +54,14 @@ defmodule HerokuConnector.ConnectionControllerTest do
   end
 
   test "updates chosen resource and redirects when data is valid", %{conn: conn, account: account} do
-    connection = Repo.insert! %Connection{account_id: account.id}
+    connection = Repo.insert! %Connection{account_id: account.id, connection_data: %ConnectionData{}}
     conn =  conn |> assign(:current_account, account) |> put(connection_path(conn, :update, connection), connection: @valid_attrs)
     assert redirected_to(conn) == connection_path(conn, :show, connection)
     assert Repo.get_by(Connection, @valid_attrs)
   end
 
   test "does not update chosen resource and renders errors when data is invalid", %{conn: conn, account: account} do
-    connection = Repo.insert! %Connection{account_id: account.id}
+    connection = Repo.insert! %Connection{account_id: account.id, connection_data: %ConnectionData{}}
     conn = conn |> assign(:current_account, account) |> put(connection_path(conn, :update, connection), connection: @invalid_attrs)
     assert html_response(conn, 200) =~ "Edit connection"
   end
