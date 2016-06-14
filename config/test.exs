@@ -21,5 +21,6 @@ config :heroku_connector, HerokuConnector.Repo,
 config :heroku_connector,
   dnsimple_domains_service: HerokuConnector.Dnsimple.DomainsServiceMock,
   dnsimple_zones_service: HerokuConnector.Dnsimple.ZonesServiceMock,
-  heroku_apps_service: HerokuConnector.Heroku.AppsServiceMock
+  heroku_apps_service: HerokuConnector.Heroku.AppsServiceMock,
+  heroku_domains_service: HerokuConnector.Heroku.DomainsServiceMock
 

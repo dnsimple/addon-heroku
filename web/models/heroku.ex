@@ -19,15 +19,31 @@ defmodule HerokuConnector.Heroku do
     app_service.get(client(account), app_id)
   end
 
+  def create_domains(account, app_id, hostnames) do
+    Enum.map(hostnames, fn(hostname) ->
+      domain_service.create(client(account, app_id), %{"hostname" => hostname})
+    end)
+  end
+
+  def delete_domains(account, app_id, domain_ids) do
+    Enum.map(domain_ids, fn(domain_id) ->
+      domain_service.delete(client(account, app_id), domain_id)
+    end)
+  end
+
   @doc """
   Get the client for the given account.
   """
-  def client(account) do
-    Happi.api_client(api_key: account.heroku_access_token)
+  def client(account, app \\ nil) do
+    Happi.api_client(api_key: account.heroku_access_token, app: app)
   end
 
   defp app_service do
     Application.get_env(:heroku_connector, :heroku_apps_service, Happi.Heroku.App)
+  end
+
+  defp domain_service do
+    Application.get_env(:heroku_connector, :heroku_domains_service, Happi.Heroku.Domain)
   end
 
 

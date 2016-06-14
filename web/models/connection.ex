@@ -99,23 +99,36 @@ defmodule HerokuConnector.Connection do
     app = HerokuConnector.Heroku.app(model.account, model.heroku_app_id)
     uri = URI.parse(app.web_url)
 
-    records = [
+    # DNSimple record setup
+    dnsimple_records = [
       %Dnsimple.Record{type: "ALIAS", name: "", content: uri.host, ttl: 3600},
       %Dnsimple.Record{type: "CNAME", name: "www", content: uri.host, ttl: 3600}
     ]
 
-    create_records_results = HerokuConnector.Dnsimple.create_records(model.account, domain.name, records)
-    record_ids = Enum.filter(Enum.map(create_records_results, fn(result) ->
+    dnsimple_record_ids = HerokuConnector.Dnsimple.create_records(model.account, domain.name, dnsimple_records)
+    |> Enum.map(fn(result) ->
       case result do
-        {:ok, response} ->
-          response.data.id
-        {:error, error} ->
-          Logger.error("Error adding record: #{inspect error}")
-          nil
+        {:ok, response} -> response.data.id
+        {:error, error} -> raise "Error adding record: #{inspect error}"
       end
-    end), &(&1))
+    end)
 
-    connection_data = %ConnectionData{dnsimple_record_ids: record_ids}
+    # Heroku domain setup
+    heroku_hostnames = [
+      domain.name,
+      "www.#{domain.name}"
+    ]
+
+    heroku_domain_ids = HerokuConnector.Heroku.create_domains(model.account, app.id, heroku_hostnames)
+    |> Enum.map(fn(res) ->
+      case res do
+        %Happi.Heroku.Domain{id: id} -> id
+        _ -> raise "Error adding heroku domain: #{inspect res}"
+      end
+    end)
+
+    # Persist everything
+    connection_data = %ConnectionData{dnsimple_record_ids: dnsimple_record_ids, heroku_domain_ids: heroku_domain_ids}
 
     changeset = model
     |> change
@@ -130,9 +143,10 @@ defmodule HerokuConnector.Connection do
     model = Repo.preload(model, :account)
 
     domain = HerokuConnector.Dnsimple.domain(model.account, model.dnsimple_domain_id)
-    _app = HerokuConnector.Heroku.app(model.account, model.heroku_app_id)
-
     HerokuConnector.Dnsimple.delete_records(model.account, domain.name, model.connection_data.dnsimple_record_ids)
+
+    app = HerokuConnector.Heroku.app(model.account, model.heroku_app_id)
+    HerokuConnector.Heroku.delete_domains(model.account, app.id, model.connection_data.heroku_domain_ids)
 
     model
   end
