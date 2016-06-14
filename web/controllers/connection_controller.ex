@@ -27,7 +27,8 @@ defmodule HerokuConnector.ConnectionController do
             conn
             |> put_flash(:info, "Connection created successfully.")
             |> redirect(to: connection_path(conn, :index))
-          {:error, _} ->
+          {:error, results} ->
+            IO.inspect(results)
             conn
             |> put_flash(:info, "Failed to create connection.")
             |> redirect(to: connection_path(conn, :index))

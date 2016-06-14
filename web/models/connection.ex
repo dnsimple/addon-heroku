@@ -115,7 +115,7 @@ defmodule HerokuConnector.Connection do
     # Function to extract the ID from the result tuple {:ok, id}
     extract_id_fn = fn({:ok, id}) -> id end
 
-    # Currently there is a behaivor in the DNSimple API where record creation fails but the
+    # Currently there is a behavior in the DNSimple API where record creation fails but the
     # endpoint returns a 201 with nil ids in the records that are returned. The second filter
     # in the chain below filters out those nil ids.
     connection_data = %ConnectionData{
@@ -123,11 +123,11 @@ defmodule HerokuConnector.Connection do
       heroku_domain_ids: Enum.filter_map(heroku_connect_results, success_fn, extract_id_fn)
     }
 
-    changeset = model
+    # Persist the connection data into the connection
+    model
     |> change
     |> put_embed(:connection_data, connection_data)
-
-    update(changeset)
+    |> update
 
     case Enum.all?(dnsimple_connect_results ++ heroku_connect_results, success_fn) do
       true ->
@@ -155,16 +155,6 @@ defmodule HerokuConnector.Connection do
     end)
   end
 
-  defp connect_dnsimple!(account, domain_name, app_hostname) do
-    HerokuConnector.Dnsimple.create_records(account, domain_name, dnsimple_records(app_hostname))
-    |> Enum.map(fn(result) ->
-      case result do
-        {:ok, response} -> response.data.id
-        {:error, error} -> raise "Error adding record: #{inspect error}"
-      end
-    end)
-  end
-
   defp heroku_hostnames(domain_name) do
      [domain_name, "www.#{domain_name}"]
   end
@@ -175,16 +165,6 @@ defmodule HerokuConnector.Connection do
       case res do
         %Happi.Heroku.Domain{id: id} -> {:ok, id}
         _ -> {:error, res}
-      end
-    end)
-  end
-
-  defp connect_heroku!(account, domain_name, app_id) do
-    HerokuConnector.Heroku.create_domains(account, app_id, heroku_hostnames(domain_name))
-    |> Enum.map(fn(res) ->
-      case res do
-        %Happi.Heroku.Domain{id: id} -> id
-        _ -> raise "Error adding heroku domain: #{inspect res}"
       end
     end)
   end
