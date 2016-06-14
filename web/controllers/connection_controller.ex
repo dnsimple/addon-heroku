@@ -22,10 +22,16 @@ defmodule HerokuConnector.ConnectionController do
     account = conn.assigns[:current_account]
     case Connection.create(%Connection{account_id: conn.assigns[:current_account].id}, connection_params) do
       {:ok, connection} ->
-        Connection.connect!(connection)
-        conn
-        |> put_flash(:info, "Connector created successfully.")
-        |> redirect(to: connection_path(conn, :index))
+        case Connection.connect(connection) do
+          {:ok, _} ->
+            conn
+            |> put_flash(:info, "Connection created successfully.")
+            |> redirect(to: connection_path(conn, :index))
+          {:error, _} ->
+            conn
+            |> put_flash(:info, "Failed to create connection.")
+            |> redirect(to: connection_path(conn, :index))
+        end
       {:error, changeset} ->
         render(conn, "new.html", changeset: changeset, dnsimple_domains: HerokuConnector.Dnsimple.domains(account), heroku_apps: HerokuConnector.Heroku.apps(account))
     end
@@ -52,7 +58,7 @@ defmodule HerokuConnector.ConnectionController do
     case Connection.update(changeset) do
       {:ok, connection} ->
         conn
-        |> put_flash(:info, "Connector updated successfully.")
+        |> put_flash(:info, "Connection updated successfully.")
         |> redirect(to: connection_path(conn, :show, connection))
       {:error, changeset} ->
         render(conn, "edit.html", connection: connection, changeset: changeset, dnsimple_domains: HerokuConnector.Dnsimple.domains(account), heroku_apps: HerokuConnector.Heroku.apps(account))
@@ -66,7 +72,7 @@ defmodule HerokuConnector.ConnectionController do
     |> Connection.delete!
 
     conn
-    |> put_flash(:info, "Connector deleted successfully.")
+    |> put_flash(:info, "Connection deleted successfully.")
     |> redirect(to: connection_path(conn, :index))
   end
 end
