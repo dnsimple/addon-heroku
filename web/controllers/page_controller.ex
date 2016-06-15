@@ -4,6 +4,6 @@ defmodule HerokuConnector.PageController do
   plug HerokuConnector.Plug.CurrentAccount
 
   def index(conn, _params) do
-    render conn, "index.html", account: conn.assigns[:current_account]
+    redirect conn, to: connection_path(conn, :index)
   end
 end
