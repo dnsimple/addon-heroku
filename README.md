@@ -31,3 +31,5 @@ Now you can visit [`localhost:4000`](http://localhost:4000) from your browser.
   - Add application to Heroku
     - `heroku config:set HEROKU_CLIENT_ID=id`
     - `heroku config:set HEROKU_CLIENT_SECRET=secret`
+- `git push heroku master`
+- `heroku run "POOL_SIZE=2 mix ecto.migrate"`
