@@ -31,6 +31,10 @@ defmodule HerokuConnector.Plug.CurrentAccount do
     end
   end
 
+  def account_connected?(conn), do: !!current_account(conn)
+
+  def disconnect(conn), do: delete_session(conn, :account_id)
+
   defp fetch_account(conn) do
     case get_session(conn, :account_id) do
       nil -> nil

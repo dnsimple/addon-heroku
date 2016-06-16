@@ -14,6 +14,13 @@
   <body>
     <div class="container">
       <header class="header">
+        <%= if HerokuConnector.Plug.CurrentAccount.account_connected?(@conn) do %>
+          <nav role="navigation">
+            <ul class="nav nav-pills pull-right">
+              <li><%= link "Disconnect", to: account_path(@conn, :delete), method: :delete %></li>
+            </ul>
+          </nav>
+        <% end %>
       </header>
 
       <p class="alert alert-info" role="alert"><%= get_flash(@conn, :info) %></p>

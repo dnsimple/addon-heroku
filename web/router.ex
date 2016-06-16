@@ -18,6 +18,8 @@ defmodule HerokuConnector.Router do
 
     get "/", PageController, :index
 
+    delete "/account", AccountController, :delete
+
     get "/dnsimple/authorize", DnsimpleOauthController, :new
     get "/dnsimple/callback",  DnsimpleOauthController, :create
 
