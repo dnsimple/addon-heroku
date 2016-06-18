@@ -1,3 +1,15 @@
+defmodule HerokuConnector.Dnsimple.OauthServiceMock do
+  def exchange_authorization_for_token(_client, _attributes) do
+    {:ok, %Dnsimple.Response{data: %{access_token: "access-token"}}}
+  end
+end
+
+defmodule HerokuConnector.Dnsimple.IdentityServiceMock do
+  def whoami(_client) do
+    {:ok, %Dnsimple.Response{data: %{account: %{"id" => 1}}}}
+  end
+end
+
 defmodule HerokuConnector.Dnsimple.DomainsServiceMock do
   def domains(_client, _opts) do
     {:ok, %Dnsimple.Response{data: []}}

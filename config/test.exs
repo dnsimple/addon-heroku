@@ -19,6 +19,12 @@ config :heroku_connector, HerokuConnector.Repo,
   pool: Ecto.Adapters.SQL.Sandbox
 
 config :heroku_connector,
+  dnsimple_client_id: "dnsimple-client-id",
+  dnsimple_client_secret: "dnsimple-client-secret",
+  heroku_client_id: "heroku-client-id",
+  heroku_client_secret: "heroku-client-secret",
+  dnsimple_oauth_service: HerokuConnector.Dnsimple.OauthServiceMock,
+  dnsimple_identity_service: HerokuConnector.Dnsimple.IdentityServiceMock,
   dnsimple_domains_service: HerokuConnector.Dnsimple.DomainsServiceMock,
   dnsimple_zones_service: HerokuConnector.Dnsimple.ZonesServiceMock,
   heroku_apps_service: HerokuConnector.Heroku.AppsServiceMock,

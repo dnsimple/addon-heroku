@@ -8,7 +8,7 @@ defmodule HerokuConnector.DnsimpleOauthController do
   def new(conn, _params) do
     client    = %Dnsimple.Client{}
     client_id = Application.fetch_env!(:heroku_connector, :dnsimple_client_id)
-    oauth_url = Dnsimple.OauthService.authorize_url(client, client_id, state: @state)
+    oauth_url = HerokuConnector.Dnsimple.authorize_url(client, client_id, state: @state)
     redirect(conn, external: oauth_url)
   end
 
@@ -20,11 +20,11 @@ defmodule HerokuConnector.DnsimpleOauthController do
       code: params["code"],
       state: params["state"]
     }
-    case Dnsimple.OauthService.exchange_authorization_for_token(client, attributes) do
+    case HerokuConnector.Dnsimple.exchange_authorization_for_token(client, attributes) do
       {:ok, response} ->
         access_token = response.data.access_token
         client = %Dnsimple.Client{access_token: access_token}
-        case Dnsimple.IdentityService.whoami(client) do
+        case HerokuConnector.Dnsimple.whoami(client) do
           {:ok, %Dnsimple.Response{data: data}} ->
             account = Account.find_or_create!(Integer.to_string(data.account["id"]), %{
               "dnsimple_account_email" => data.account["email"],
