@@ -11,7 +11,7 @@ defmodule HerokuConnector.DnsimpleOauthControllerTest do
     assert redirected_to(conn) == "https://dnsimple.com/oauth/authorize?response_type=code&client_id=#{dnsimple_client_id}&state=#{state}"
   end
 
-  test "/dnsimple/callback", %{dnsimple_client_id: dnsimple_client_id, state: state} do
+  test "/dnsimple/callback", %{dnsimple_client_id: _dnsimple_client_id, state: _state} do
     conn = get conn, dnsimple_oauth_path(conn, :create)
     assert html_response(conn, 200) =~ "Connected to DNSimple as"
   end

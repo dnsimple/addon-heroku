@@ -25,7 +25,7 @@ defmodule HerokuConnector.ConnectionControllerTest do
   end
 
   test "creates resource and redirects when data is valid", %{conn: conn, account: account} do
-    conn = conn |> assign(:current_account, account) |>  post(connection_path(conn, :create), connection: @valid_attrs)
+    conn = conn |> assign(:current_account, account) |> post(connection_path(conn, :create), connection: @valid_attrs)
     assert redirected_to(conn) == connection_path(conn, :index)
     assert Repo.get_by(Connection, @valid_attrs)
   end

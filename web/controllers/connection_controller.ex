@@ -20,7 +20,7 @@ defmodule HerokuConnector.ConnectionController do
 
   def create(conn, %{"connection" => connection_params}) do
     account = conn.assigns[:current_account]
-    case Connection.create(%Connection{account_id: conn.assigns[:current_account].id}, connection_params) do
+    case Connection.create(%Connection{account_id: account.id}, connection_params) do
       {:ok, connection} ->
         case Connection.connect(connection) do
           {:ok, _} ->
