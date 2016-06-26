@@ -48,12 +48,12 @@ defmodule HerokuConnector.Connection do
   end
 
   def get(account, id) do
-    query = from c in Connection, where: c.account_id == ^account.id
+    query = from c in Connection, where: c.account_id == ^account.id, preload: [:account]
     Repo.get(query, id)
   end
 
   def get!(account, id) do
-    query = from c in Connection, where: c.account_id == ^account.id
+    query = from c in Connection, where: c.account_id == ^account.id, preload: [:account]
     Repo.get!(query, id)
   end
 
