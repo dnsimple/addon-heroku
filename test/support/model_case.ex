@@ -25,10 +25,6 @@ defmodule HerokuConnector.ModelCase do
     end
   end
 
-  setup tags do
-    :ok
-  end
-
   @doc """
   Helper for returning list of errors in model when passed certain data.
 
