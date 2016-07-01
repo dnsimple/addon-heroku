@@ -177,7 +177,22 @@ defmodule HerokuConnector.Connection do
     ]
   end
 
+  defp has_domain_service?(_account, _domain_name) do
+    false
+  end
+
+  defp remove_domain_service(_account, _domain_name) do
+    :ok
+  end
+
   defp connect_dnsimple(account, domain_name, app_hostname) do
+    # Remove any existing one-click domain service
+    case has_domain_service?(account, domain_name) do
+      true -> remove_domain_service(account, domain_name)
+      false -> :ok
+    end
+
+    # Create the appropriate DNSimple records
     HerokuConnector.Dnsimple.create_records(account, domain_name, dnsimple_records(app_hostname))
     |> Enum.map(fn(result) ->
       case result do
@@ -192,6 +207,7 @@ defmodule HerokuConnector.Connection do
   end
 
   defp connect_heroku(account, domain_name, app_id) do
+    # Create the appropriate custom domains in Heroku
     HerokuConnector.Heroku.create_domains(account, app_id, heroku_hostnames(domain_name))
     |> Enum.map(fn(res) ->
       case res do
