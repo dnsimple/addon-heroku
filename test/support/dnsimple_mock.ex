@@ -25,7 +25,7 @@ defmodule HerokuConnector.Dnsimple.ZonesServiceMock do
     {:ok, %Dnsimple.Response{data: attributes}}
   end
 
-  def delete_records(_client, _account_id, _zone_name, ids) do
+  def delete_records(_client, _account_id, _zone_name, _ids) do
     []
   end
 end
