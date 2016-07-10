@@ -172,8 +172,8 @@ defmodule HerokuConnector.Connection do
 
   defp dnsimple_records(app_hostname) do
     [
-      %Dnsimple.Record{type: "ALIAS", name: "", content: app_hostname, ttl: 3600},
-      %Dnsimple.Record{type: "CNAME", name: "www", content: app_hostname, ttl: 3600}
+      %Dnsimple.ZoneRecord{type: "ALIAS", name: "", content: app_hostname, ttl: 3600},
+      %Dnsimple.ZoneRecord{type: "CNAME", name: "www", content: app_hostname, ttl: 3600}
     ]
   end
 
