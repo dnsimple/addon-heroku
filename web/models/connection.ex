@@ -8,11 +8,19 @@ defmodule HerokuConnector.Connection do
   end
 
   defmodule ConnectionData do
-    use Ecto.Schema
+    use HerokuConnector.Web, :model
+
+    @required_fields ~w(dnsimple_record_ids heroku_domain_ids)
+    @optional_fields ~w()
 
     embedded_schema do
       field :dnsimple_record_ids, {:array, :integer}, default: []
       field :heroku_domain_ids, {:array, :string}, default: []
+    end
+
+    def changeset(model, params \\ :invalid) do
+      model
+      |> cast(params, @required_fields, @optional_fields)
     end
   end
 
@@ -36,15 +44,17 @@ defmodule HerokuConnector.Connection do
   @optional_fields ~w()
 
   def create(model, params \\ %{}) do
-    model
-    |> changeset(params)
-    |> Repo.insert
+    case model |> changeset(params) |> Repo.insert do
+      {:ok, connection} -> {:ok, connection |> Repo.preload([:account])}
+      {:error, reason} -> {:error, reason}
+    end
   end
 
   def create!(model, params \\ %{}) do
     model
     |> changeset(params)
     |> Repo.insert!
+    |> Repo.preload([:account])
   end
 
   def get(account, id) do
@@ -227,6 +237,7 @@ defmodule HerokuConnector.Connection do
     disconnect_heroku!(model.account, app.id, model.connection_data.heroku_domain_ids)
 
     model
+    |> clear_connection_data!
   end
 
   defp disconnect_dnsimple!(account, domain_name, dnsimple_record_ids) do
@@ -235,6 +246,16 @@ defmodule HerokuConnector.Connection do
 
   defp disconnect_heroku!(account, app_id, heroku_domain_ids) do
     HerokuConnector.Heroku.delete_domains(account, app_id, heroku_domain_ids)
+  end
+
+  defp clear_connection_data!(model) do
+    cs = model.connection_data |> ConnectionData.changeset(%{dnsimple_record_ids: [], heroku_domain_ids: []})
+
+    # Persist the connection data into the connection
+    model
+    |> change
+    |> put_embed(:connection_data, cs)
+    |> update!
   end
 
   defp success_fn do
