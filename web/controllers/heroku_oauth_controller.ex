@@ -21,8 +21,10 @@ defmodule HerokuConnector.HerokuOauthController do
 
         epoch = {{1970, 1, 1}, {0, 0, 0}}
 
+        # Is there a better way to handle calculating when the access
+        # token expires?
         expires_at = response.expires_at
-        |> +(:calendar.datetime_to_gregorian_seconds(epoch))
+        |> Kernel.+(:calendar.datetime_to_gregorian_seconds(epoch))
         |> :calendar.gregorian_seconds_to_datetime
         |> Ecto.DateTime.from_erl
 

@@ -172,17 +172,29 @@ defmodule HerokuConnector.Connection do
 
   defp dnsimple_records(app_hostname) do
     [
-      %Dnsimple.Record{type: "ALIAS", name: "", content: app_hostname, ttl: 3600},
-      %Dnsimple.Record{type: "CNAME", name: "www", content: app_hostname, ttl: 3600}
+      %Dnsimple.ZoneRecord{type: "ALIAS", name: "", content: app_hostname, ttl: 3600},
+      %Dnsimple.ZoneRecord{type: "CNAME", name: "www", content: app_hostname, ttl: 3600}
     ]
   end
 
   defp connect_dnsimple(account, domain_name, app_hostname) do
+    unapplied_services = case HerokuConnector.Dnsimple.applied_services(account, domain_name) do
+      [] -> []
+      services ->
+        services
+        |> Enum.filter(&(&1.short_name =~ ~r/heroku/))
+        |> Enum.map(&(HerokuConnector.Dnsimple.unapply_service(account, domain_name, &1.id)))
+    end
+
+    # Create the appropriate DNSimple records
     HerokuConnector.Dnsimple.create_records(account, domain_name, dnsimple_records(app_hostname))
     |> Enum.map(fn(result) ->
       case result do
         {:ok, response} -> {:ok, response.data.id}
-        {:error, error} -> {:error, error}
+        {:error, error} ->
+          # Failed to create records, re-apply removed services
+          Enum.each(unapplied_services, &(HerokuConnector.Dnsimple.apply_service(account, domain_name, &1)))
+          {:error, error}
       end
     end)
   end
@@ -192,6 +204,7 @@ defmodule HerokuConnector.Connection do
   end
 
   defp connect_heroku(account, domain_name, app_id) do
+    # Create the appropriate custom domains in Heroku
     HerokuConnector.Heroku.create_domains(account, app_id, heroku_hostnames(domain_name))
     |> Enum.map(fn(res) ->
       case res do

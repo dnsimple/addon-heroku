@@ -26,6 +26,7 @@ config :heroku_connector,
   dnsimple_oauth_service: HerokuConnector.Dnsimple.OauthServiceMock,
   dnsimple_identity_service: HerokuConnector.Dnsimple.IdentityServiceMock,
   dnsimple_domains_service: HerokuConnector.Dnsimple.DomainsServiceMock,
+  dnsimple_domain_services_service: HerokuConnector.Dnsimple.DomainServicesServiceMock,
   dnsimple_zones_service: HerokuConnector.Dnsimple.ZonesServiceMock,
   heroku_apps_service: HerokuConnector.Heroku.AppsServiceMock,
   heroku_domains_service: HerokuConnector.Heroku.DomainsServiceMock
