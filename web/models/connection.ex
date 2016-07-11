@@ -177,19 +177,13 @@ defmodule HerokuConnector.Connection do
     ]
   end
 
-  defp has_domain_service?(_account, _domain_name) do
-    false
-  end
-
-  defp remove_domain_service(_account, _domain_name) do
-    :ok
-  end
-
   defp connect_dnsimple(account, domain_name, app_hostname) do
-    # Remove any existing one-click domain service
-    case has_domain_service?(account, domain_name) do
-      true -> remove_domain_service(account, domain_name)
-      false -> :ok
+    unapplied_services = case HerokuConnector.Dnsimple.applied_services(account, domain_name) do
+      [] -> []
+      services ->
+        services
+        |> Enum.filter(&(&1.short_name =~ ~r/heroku/))
+        |> Enum.map(&(HerokuConnector.Dnsimple.unapply_service(account, domain_name, &1.id)))
     end
 
     # Create the appropriate DNSimple records
@@ -197,7 +191,10 @@ defmodule HerokuConnector.Connection do
     |> Enum.map(fn(result) ->
       case result do
         {:ok, response} -> {:ok, response.data.id}
-        {:error, error} -> {:error, error}
+        {:error, error} ->
+          # Failed to create records, re-apply removed services
+          Enum.each(unapplied_services, &(HerokuConnector.Dnsimple.apply_service(account, domain_name, &1)))
+          {:error, error}
       end
     end)
   end

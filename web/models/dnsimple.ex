@@ -22,7 +22,7 @@ defmodule HerokuConnector.Dnsimple do
       {:ok, response} -> response.data
       {:error, error} ->
         IO.inspect(error)
-        raise "Failed to retreive domains: #{inspect error}"
+        raise "Failed to retrieve domains: #{inspect error}"
     end
   end
 
@@ -31,7 +31,36 @@ defmodule HerokuConnector.Dnsimple do
       {:ok, response} -> response.data
       {:error, error} ->
         IO.inspect(error)
-        raise "Failed to retreive domain: #{inspect error}"
+        raise "Failed to retrieve domain: #{inspect error}"
+    end
+  end
+
+  # Domain Services
+
+  def applied_services(account, domain_name) do
+    case domain_service_service.applied_services(client(account), account.id, domain_name) do
+      {:ok, response} -> response.data
+      {:error, error} ->
+        IO.inspect(error)
+        raise "Failed to retrieve domain services: #{inspect error}"
+    end
+  end
+
+  def apply_service(account, domain_name, service_id) do
+    case domain_service_service.apply_service(client(account), account.id, domain_name, service_id) do
+      {:ok, _response} -> service_id
+      {:error, error} ->
+        IO.inspect(error)
+        raise "Failed to apply service: #{inspect error}"
+    end
+  end
+
+  def unapply_service(account, domain_name, service_id) do
+    case domain_service_service.unapply_service(client(account), account.id, domain_name, service_id) do
+      {:ok, _response} -> service_id
+      {:error, error} ->
+        IO.inspect(error)
+        raise "Failed to unapply service: #{inspect error}"
     end
   end
 
@@ -67,6 +96,10 @@ defmodule HerokuConnector.Dnsimple do
 
   defp domain_service do
     Application.get_env(:heroku_connector, :dnsimple_domains_service, Dnsimple.DomainsService)
+  end
+
+  defp domain_service_service do
+    Application.get_env(:heroku_connector, :dnsimple_domain_services_service, Dnsimple.DomainServicesService)
   end
 
   defp zone_service do
