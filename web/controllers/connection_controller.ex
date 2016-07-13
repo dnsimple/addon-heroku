@@ -79,20 +79,65 @@ defmodule HerokuConnector.ConnectionController do
   def update(conn, %{"id" => id, "connection" => connection_params}) do
     account = conn.assigns[:current_account]
     connection = Connection.get!(account, id)
+    case HerokuConnector.Dnsimple.certificates(account, connection.dnsimple_domain_id) do
+      [] ->
+        reconnect(conn, %{"id" => connection.id, "connection" => connection_params})
+      _ ->
+        redirect(conn, to: connection_path(conn, :reconnect, connection, %{"connection" => connection_params}))
+    end
+  end
+
+  def reconnect(conn, %{"id" => id, "connection" => connection_params}) do
+    account = conn.assigns[:current_account]
+    connection = Connection.get!(account, id)
     changeset = Connection.changeset(connection, connection_params)
 
-    case Connection.reconnect(changeset) do
-      {:ok, _} ->
-        case Connection.update(changeset) do
-          {:ok, new_connection} ->
-            conn
-            |> put_flash(:info, "Connection updated successfully.")
-            |> redirect(to: connection_path(conn, :show, new_connection))
-          {:error, changeset} ->
+    # First get the domain (new or old) to check for the certificate
+    model = changeset.data |> Repo.preload(:account)
+    domain = HerokuConnector.Dnsimple.domain(model.account, model.dnsimple_domain_id)
+    new_domain = case Map.get(changeset.changes, :dnsimple_domain_id) do
+      nil -> domain
+      dnsimple_domain_id ->  HerokuConnector.Dnsimple.domain(model.account, dnsimple_domain_id)
+    end
+
+    # Check if there are any certificates present on the target domain
+    case HerokuConnector.Dnsimple.active_certificates(account, new_domain.id) do
+      [] ->
+        # No certificates on the target domain, reconnect immediately
+        case Connection.reconnect(changeset) do
+          {:ok, _} ->
+            case Connection.update(changeset) do
+              {:ok, new_connection} ->
+                conn
+                |> put_flash(:info, "Connection updated successfully.")
+                |> redirect(to: connection_path(conn, :show, new_connection))
+              {:error, changeset} ->
+                render(conn, "edit.html", connection: connection, changeset: changeset, dnsimple_domains: HerokuConnector.Dnsimple.domains(account), heroku_apps: HerokuConnector.Heroku.apps(account))
+            end
+          {:error, _} ->
             render(conn, "edit.html", connection: connection, changeset: changeset, dnsimple_domains: HerokuConnector.Dnsimple.domains(account), heroku_apps: HerokuConnector.Heroku.apps(account))
         end
-      {:error, _} ->
-        render(conn, "edit.html", connection: connection, changeset: changeset, dnsimple_domains: HerokuConnector.Dnsimple.domains(account), heroku_apps: HerokuConnector.Heroku.apps(account))
+      certificates ->
+        case Map.get(connection_params, "dnsimple_certificate_id") do
+          nil ->
+            # Certificates on the target domain and no certificate id passed
+            render(conn, "reconnect.html", changeset: changeset, connection: connection, dnsimple_domain: new_domain, dnsimple_certificates: certificates)
+          certificate_id ->
+            # Certificates on the target domain and certificate id passed
+            case Connection.reconnect(changeset, connection_params) do
+              {:ok, _} ->
+                case Connection.update(changeset) do
+                  {:ok, new_connection} ->
+                    conn
+                    |> put_flash(:info, "Connection updated successfully.")
+                    |> redirect(to: connection_path(conn, :show, new_connection))
+                  {:error, changeset} ->
+                    render(conn, "reconnect.html", changeset: changeset, connection: connection, dnsimple_domain: new_domain, dnsimple_certificates: certificates)
+                end
+              {:error, _} ->
+                render(conn, "reconnect.html", changeset: changeset, connection: connection, dnsimple_domain: new_domain, dnsimple_certificates: certificates)
+            end
+        end
     end
   end
 

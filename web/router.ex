@@ -29,6 +29,9 @@ defmodule HerokuConnector.Router do
     resources "/connections", ConnectionController
     get "/connections/:id/connect", ConnectionController, :connect
     put "/connections/:id/connect", ConnectionController, :connect
+
+    get "/connections/:id/reconnect", ConnectionController, :reconnect
+    put "/connections/:id/reconnect", ConnectionController, :reconnect
   end
 
   # Other scopes may use custom stacks.
