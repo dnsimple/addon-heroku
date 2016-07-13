@@ -24,15 +24,22 @@ defmodule HerokuConnector.ConnectionControllerTest do
     assert html_response(conn, 200) =~ "New connection"
   end
 
-  test "creates resource and redirects when data is valid", %{conn: conn, account: account} do
+  test "creates resource and redirects when data is valid and no certificates are present", %{conn: conn, account: account} do
     conn = conn |> assign(:current_account, account) |> post(connection_path(conn, :create), connection: @valid_attrs)
+    connection = Repo.get_by(Connection, @valid_attrs)
+    assert connection
     assert redirected_to(conn) == connection_path(conn, :index)
-    assert Repo.get_by(Connection, @valid_attrs)
   end
 
   test "does not create resource and renders errors when data is invalid", %{conn: conn, account: account} do
     conn = conn |> assign(:current_account, account) |> post(connection_path(conn, :create), connection: @invalid_attrs)
     assert html_response(conn, 200) =~ "New connection"
+  end
+
+  test "connects and redirects to index when no certificates are present", %{conn: conn, account: account} do
+    connection = Repo.insert! %Connection{account_id: account.id}
+    conn = conn |> assign(:current_account, account) |> get(connection_path(conn, :connect, connection))
+    assert redirected_to(conn) == connection_path(conn, :index)
   end
 
   test "shows chosen resource", %{conn: conn, account: account} do

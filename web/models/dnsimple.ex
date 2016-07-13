@@ -35,6 +35,39 @@ defmodule HerokuConnector.Dnsimple do
     end
   end
 
+  # Domain Certificates
+
+  def certificates(account, domain_name) do
+    case domain_certificate_service.certificates(client(account), account.id, domain_name) do
+      {:ok, response} -> response.data
+      {:error, error} ->
+        IO.inspect(error)
+        raise "Failed to retrieve certificates: #{inspect error}"
+    end
+  end
+
+  def active_certificates(account, domain_name) do
+    Enum.filter(certificates(account, domain_name), fn(c) -> c.state == "issued" end)
+  end
+
+  def download_certificate(account, domain_name, certificate_id) do
+    case domain_certificate_service.download(client(account), account.id, domain_name, certificate_id) do
+      {:ok, response} -> response.data
+      {:error, error} ->
+        IO.inspect(error)
+        raise "Failed to download certificate: #{inspect error}"
+    end
+  end
+
+  def private_key(account, domain_name, certificate_id) do
+    case domain_certificate_service.private_key(client(account), account.id, domain_name, certificate_id) do
+      {:ok, response} -> response.data
+      {:error, error} ->
+        IO.inspect(error)
+        raise "Failed to get private key: #{inspect error}"
+    end
+  end
+
   # Domain Services
 
   def applied_services(account, domain_name) do
@@ -96,6 +129,10 @@ defmodule HerokuConnector.Dnsimple do
 
   defp domain_service do
     Application.get_env(:heroku_connector, :dnsimple_domains_service, Dnsimple.DomainsService)
+  end
+
+  defp domain_certificate_service do
+    Application.get_env(:heroku_connector, :dnsimple_domain_certificates_service, Dnsimple.DomainCertificatesService)
   end
 
   defp domain_service_service do
