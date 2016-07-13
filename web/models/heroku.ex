@@ -3,7 +3,7 @@ defmodule HerokuConnector.Heroku do
 
   alias HerokuConnector.Account
 
-  # Functions to get Heroku data.
+  # Apps
 
   @doc """
   Get all Heroku apps for the given `account`.
@@ -19,6 +19,20 @@ defmodule HerokuConnector.Heroku do
     app_service.get(client(account), app_id)
   end
 
+  # Add-on attachments
+
+  def create_addon(account, app_id, addon_id) do
+    addon_service.create(client(account, app_id), %{"plan" => addon_id})
+  end
+
+  # SSL Endpoints
+
+  def create_ssl_endpoint(account, app_id, certificate_chain, private_key) do
+    ssl_endpoint_service.create(client(account, app_id), %{"certificate_chain" => certificate_chain, "private_key" => private_key})
+  end
+
+  # Domains
+
   def create_domains(account, app_id, hostnames) do
     Enum.map(hostnames, fn(hostname) ->
       domain_service.create(client(account, app_id), %{"hostname" => hostname})
@@ -30,6 +44,8 @@ defmodule HerokuConnector.Heroku do
       domain_service.delete(client(account, app_id), domain_id)
     end)
   end
+
+  # Service adapters
 
   @doc """
   Get the client for the given account.
@@ -44,6 +60,14 @@ defmodule HerokuConnector.Heroku do
 
   defp domain_service do
     Application.get_env(:heroku_connector, :heroku_domains_service, Happi.Heroku.Domain)
+  end
+
+  defp addon_service do
+    Application.get_env(:heroku_connector, :heroku_addons_service, Happi.Heroku.Addon)
+  end
+
+  defp ssl_endpoint_service do
+    Application.get_env(:heroku_connector, :heroku_ssl_endpoints_service, Happi.Heroku.SslEndpoint)
   end
 
 

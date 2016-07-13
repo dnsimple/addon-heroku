@@ -17,3 +17,15 @@ defmodule HerokuConnector.Heroku.DomainsServiceMock do
     %Happi.Heroku.Domain{id: id}
   end
 end
+
+defmodule HerokuConnector.Heroku.AddonsServiceMock do
+  def create(_client, _map) do
+    %Happi.Heroku.Addon{}
+  end
+end
+
+defmodule HerokuConnector.Heroku.SslEndpointsServiceMock do
+  def create(_client, _map) do
+    %Happi.Heroku.SslEndpoint{}
+  end
+end

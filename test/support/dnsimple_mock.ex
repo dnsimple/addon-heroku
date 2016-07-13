@@ -20,6 +20,24 @@ defmodule HerokuConnector.Dnsimple.DomainsServiceMock do
   end
 end
 
+defmodule HerokuConnector.Dnsimple.DomainCertificatesServiceMock do
+  def certificates(_client, _account_id, _name) do
+    {:ok, %Dnsimple.Response{data: []}}
+  end
+
+  def active_certificates(_client, _account_id, _name) do
+    {:ok, %Dnsimple.Response{data: []}}
+  end
+
+  def download(_client, _account_id, _name, _certificate_id) do
+    {:ok, %Dnsimple.Response{data: %Dnsimple.Certificate{chain: "certificate-chain"}}}
+  end
+
+  def private_key(_client, _account_id, _name, _certificate_id) do
+    {:ok, %Dnsimple.Response{data: %Dnsimple.Certificate{private_key: "private-key"}}}
+  end
+end
+
 defmodule HerokuConnector.Dnsimple.DomainServicesServiceMock do
   def applied_services(_client, _account_id, _name) do
     {:ok, %Dnsimple.Response{data: []}}
