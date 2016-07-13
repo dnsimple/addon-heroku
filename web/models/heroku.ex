@@ -25,10 +25,18 @@ defmodule HerokuConnector.Heroku do
     addon_service.create(client(account, app_id), %{"plan" => addon_id})
   end
 
+  def delete_addon(account, app_id, addon_id) do
+    addon_service.delete(client(account, app_id), addon_id)
+  end
+
   # SSL Endpoints
 
   def create_ssl_endpoint(account, app_id, certificate_chain, private_key) do
     ssl_endpoint_service.create(client(account, app_id), %{"certificate_chain" => certificate_chain, "private_key" => private_key})
+  end
+
+  def delete_ssl_endpoint(account, app_id, ssl_endpoint_id) do
+    ssl_endpoint_service.delete(client(account, app_id), ssl_endpoint_id)
   end
 
   # Domains

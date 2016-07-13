@@ -175,10 +175,8 @@ defmodule HerokuConnector.Connection do
     # Create the SSL endpoint
     downloaded_certificate = HerokuConnector.Dnsimple.download_certificate(account, domain_name, dnsimple_certificate_id)
     certificate_bundle = List.flatten([downloaded_certificate.server, downloaded_certificate.chain]) |> Enum.join("\n")
-    IO.inspect certificate_bundle
     private_key = HerokuConnector.Dnsimple.private_key(account, domain_name, dnsimple_certificate_id).private_key
     ssl_endpoint = HerokuConnector.Heroku.create_ssl_endpoint(account, app_id, certificate_bundle, private_key)
-    IO.inspect ssl_endpoint
 
     # Return the SSL endpoint
     {:ok, ssl_endpoint}
@@ -286,6 +284,9 @@ defmodule HerokuConnector.Connection do
     app = HerokuConnector.Heroku.app(model.account, model.heroku_app_id)
 
     if model.connection_data != nil do
+      if model.connection_data.ssl_endpoint_id != nil do
+        disable_heroku_ssl_endpoint!(model.account, domain.name, app.id, model.connection_data.ssl_endpoint_id)
+      end
       disconnect_dnsimple!(model.account, domain.name, model.connection_data.dnsimple_record_ids)
       disconnect_heroku!(model.account, app.id, model.connection_data.heroku_domain_ids)
 
@@ -312,6 +313,21 @@ defmodule HerokuConnector.Connection do
     |> put_embed(:connection_data, cs)
     |> update!
   end
+
+  defp disable_heroku_ssl_endpoint!(account, domain_name, app_id, ssl_endpoint_id) do
+    # Currently this implementation relies on the SSL add-on.
+    # Eventually replace it with Heroku SSL (https://devcenter.heroku.com/articles/ssl-beta)
+
+    # Remove the SSL endpoint
+    HerokuConnector.Heroku.delete_ssl_endpoint(account, app_id, ssl_endpoint_id)
+
+    # Disable the SSL add-on
+    HerokuConnector.Heroku.delete_addon(account, app_id, _addon_id = "ssl:endpoint")
+
+    :ok
+  end
+
+  # Useful functions to be applied on lists
 
   defp success_fn do
     fn(res) ->
