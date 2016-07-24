@@ -9,8 +9,14 @@ defmodule HerokuConnector.ConnectionController do
 
   def index(conn, _params) do
     account = conn.assigns[:current_account]
-    connections = Connection.all(account)
-    render(conn, "index.html", connections: connections)
+    case Connection.all(account) do
+      [] ->
+        conn
+        |> put_flash(:info, "You have no connections; go ahead and create one.")
+        |> redirect(to: connection_path(conn, :new))
+      connections ->
+        render(conn, "index.html", connections: connections)
+    end
   end
 
   def new(conn, _params) do

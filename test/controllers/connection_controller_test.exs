@@ -14,7 +14,13 @@ defmodule HerokuConnector.ConnectionControllerTest do
     {:ok, account: account}
   end
 
+  test "redirects to new connection if none present", %{conn: conn, account: account} do
+    conn = conn |> assign(:current_account, account) |> get(connection_path(conn, :index))
+    assert redirected_to(conn) == connection_path(conn, :new)
+  end
+
   test "lists all entries on index", %{conn: conn, account: account} do
+    Repo.insert! %Connection{account_id: account.id}
     conn = conn |> assign(:current_account, account) |> get(connection_path(conn, :index))
     assert html_response(conn, 200) =~ "Listing connections"
   end
