@@ -281,7 +281,7 @@ defmodule HerokuConnector.Connection do
     end
   end
 
-  defp reconnect_dnsimple(model, domain, _app, new_domain, new_app, hostname) do
+  defp reconnect_dnsimple(model, domain, _app, new_domain, _new_app, hostname) do
     disconnect_dnsimple!(model.account, domain.name, model.connection_data.dnsimple_record_ids)
     connect_dnsimple(model.account, new_domain.name, hostname)
   end
