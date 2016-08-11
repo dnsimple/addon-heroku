@@ -52,6 +52,12 @@ defmodule HerokuConnector.Dnsimple.DomainServicesServiceMock do
   end
 end
 
+defmodule HerokuConnector.Dnsimple.WebhooksServiceMock do
+  def create_webhook(_client, _account_id, _webhook_url) do
+    {:ok, %Dnsimple.Response{data: %Dnsimple.Webhook{}}}
+  end
+end
+
 defmodule HerokuConnector.Dnsimple.ZonesServiceMock do
   def create_record(_client, _account_id, _zone_name, attributes) do
     {:ok, %Dnsimple.Response{data: attributes}}

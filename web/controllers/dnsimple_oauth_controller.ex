@@ -31,6 +31,21 @@ defmodule HerokuConnector.DnsimpleOauthController do
               "dnsimple_access_token" => access_token
             })
 
+            # Add a webhook if necessary
+            require Logger
+            case Mix.env do
+              :dev ->
+                Logger.debug("Using dev environment")
+                url = Application.get_env(:heroku_connector, :webhook_url)
+                Logger.debug("Creating webhook with url: #{url}")
+                HerokuConnector.Dnsimple.create_webhook(account, url)
+              env ->
+                Logger.debug("Using environment #{inspect env}")
+                url = webhook_url(conn, :handle, account.id)
+                Logger.debug("Creating webhook with url: #{url}")
+                HerokuConnector.Dnsimple.create_webhook(account, url)
+            end
+
             conn
             |> put_session(:account_id, account.id)
             |> render("welcome.html", account: account)

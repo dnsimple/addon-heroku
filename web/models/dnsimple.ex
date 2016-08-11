@@ -111,6 +111,18 @@ defmodule HerokuConnector.Dnsimple do
     Enum.map(record_ids, &(zs.delete_record(c, account.id, zone_name, &1)))
   end
 
+  # Webhooks
+
+  def create_webhook(account, webhook_url) do
+    c = client(account)
+    case webhook_service.create_webhook(client(account), account.id, %{url: webhook_url}) do
+      {:ok, response} -> response.data
+      {:error, error} ->
+        IO.inspect(error)
+        raise "Failed to create webhook: #{inspect error}"
+    end
+  end
+
   # Client for account
 
   def client(account) do
@@ -137,6 +149,10 @@ defmodule HerokuConnector.Dnsimple do
 
   defp domain_service_service do
     Application.get_env(:heroku_connector, :dnsimple_domain_services_service, Dnsimple.DomainServicesService)
+  end
+
+  defp webhook_service do
+    Application.get_env(:heroku_connector, :dnsimple_webhooks_service, Dnsimple.WebhooksService)
   end
 
   defp zone_service do

@@ -32,6 +32,8 @@ defmodule HerokuConnector.Router do
 
     get "/connections/:id/reconnect", ConnectionController, :reconnect
     put "/connections/:id/reconnect", ConnectionController, :reconnect
+
+    post "/webhooks/:account_id", WebhookController, :handle
   end
 
   # Other scopes may use custom stacks.
