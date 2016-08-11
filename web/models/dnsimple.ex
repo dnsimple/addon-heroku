@@ -114,7 +114,6 @@ defmodule HerokuConnector.Dnsimple do
   # Webhooks
 
   def create_webhook(account, webhook_url) do
-    c = client(account)
     case webhook_service.create_webhook(client(account), account.id, %{url: webhook_url}) do
       {:ok, response} -> response.data
       {:error, error} ->

@@ -47,4 +47,4 @@ config :heroku_connector,
   heroku_client_id: "c0920219-7ef7-41f9-8645-d599db85b2a5",
   heroku_client_secret: "f77ed12c-7126-4acc-9513-9143ebeae4e5"
 
-import_config "local.exs"
+import_config "*.local.exs"
