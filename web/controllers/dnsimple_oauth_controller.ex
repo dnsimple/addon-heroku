@@ -45,6 +45,13 @@ defmodule HerokuConnector.DnsimpleOauthController do
             webhook = HerokuConnector.Dnsimple.create_webhook(account, url)
             Logger.debug("Webhook: #{inspect webhook}")
 
+            account = case Account.update(Account.changeset(account, %{configuration: %{webhook_id: webhook.id}})) do
+              {:ok, account} -> account
+              {:error, error} ->
+                IO.inspect(error)
+                raise "Failed to update account with webhook ID: #{inspect error}"
+            end
+
             conn
             |> put_session(:account_id, account.id)
             |> render("welcome.html", account: account)

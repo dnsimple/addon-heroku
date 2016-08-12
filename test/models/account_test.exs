@@ -10,7 +10,8 @@ defmodule HerokuConnector.AccountTest do
     heroku_account_id: "heroku-account-id",
     heroku_access_token: "heroku-token",
     heroku_access_token_expires_at: Ecto.DateTime.cast!("2020-01-01 00:00:00"),
-    heroku_refresh_token: "heroku-refresh"
+    heroku_refresh_token: "heroku-refresh",
+    configuration: %{"webhook_id" => "1"}
   }
 
   setup do

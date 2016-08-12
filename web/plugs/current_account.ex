@@ -33,7 +33,14 @@ defmodule HerokuConnector.Plug.CurrentAccount do
 
   def account_connected?(conn), do: !!current_account(conn)
 
-  def disconnect(conn), do: delete_session(conn, :account_id)
+  def disconnect(conn) do
+    account = current_account(conn)
+    case account.configuration["webhook_id"] do
+      nil -> :ok
+      webhook_id -> HerokuConnector.Dnsimple.delete_webhook(account, webhook_id)
+    end
+    delete_session(conn, :account_id)
+  end
 
   defp fetch_account(conn) do
     case get_session(conn, :account_id) do

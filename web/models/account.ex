@@ -11,12 +11,13 @@ defmodule HerokuConnector.Account do
     field :heroku_access_token, :string
     field :heroku_access_token_expires_at, Timex.Ecto.DateTime
     field :heroku_refresh_token, :string
+    field :configuration, :map
 
     timestamps
   end
 
   @required_fields ~w(dnsimple_account_id)
-  @optional_fields ~w(dnsimple_account_email dnsimple_access_token heroku_account_id heroku_access_token heroku_access_token_expires_at heroku_refresh_token)
+  @optional_fields ~w(dnsimple_account_email dnsimple_access_token heroku_account_id heroku_access_token heroku_access_token_expires_at heroku_refresh_token configuration)
 
   def create(model, params \\ %{}) do
     model
