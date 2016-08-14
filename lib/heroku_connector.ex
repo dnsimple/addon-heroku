@@ -11,8 +11,8 @@ defmodule HerokuConnector do
       supervisor(HerokuConnector.Endpoint, []),
       # Start the Ecto repository
       supervisor(HerokuConnector.Repo, []),
-      # Here you could define other workers and supervisors as children
-      # worker(HerokuConnector.Worker, [arg1, arg2, arg3]),
+      # Start the webhook request tracker
+      worker(HerokuConnector.WebhookRequestTracker, []),
     ]
 
     # See http://elixir-lang.org/docs/stable/elixir/Supervisor.html
