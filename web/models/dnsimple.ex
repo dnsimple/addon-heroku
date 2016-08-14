@@ -123,6 +123,10 @@ defmodule HerokuConnector.Dnsimple do
   end
 
   def delete_webhook(account, webhook_id) do
+    webhook_service.delete_webhook(client(account), account.id, webhook_id)
+  end
+
+  def delete_webhook!(account, webhook_id) do
     case webhook_service.delete_webhook(client(account), account.id, webhook_id) do
       {:ok, response} -> response.data
       {:error, error} ->
