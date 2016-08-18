@@ -1,12 +1,5 @@
 defmodule HerokuConnector.Connection do
 
-  defmodule Configuration do
-    use Ecto.Schema
-
-    embedded_schema do
-    end
-  end
-
   defmodule ConnectionData do
     use HerokuConnector.Web, :model
 
@@ -35,7 +28,7 @@ defmodule HerokuConnector.Connection do
     belongs_to :account, HerokuConnector.Account
     field :dnsimple_domain_id, :string
     field :heroku_app_id, :string
-    embeds_one :configuration, HerokuConnector.Connection.Configuration, on_replace: :delete
+    field :configuration, :map
     embeds_one :connection_data, HerokuConnector.Connection.ConnectionData, on_replace: :delete
 
     timestamps
