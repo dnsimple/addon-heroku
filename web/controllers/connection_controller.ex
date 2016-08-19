@@ -43,7 +43,7 @@ defmodule HerokuConnector.ConnectionController do
 
   def connect(conn, %{"id" => id, "connection" => connection_params}) do
     account = conn.assigns[:current_account]
-    connection = Connection.get!(account, id)
+    connection = Connection.get!(account, id) |> Repo.preload(:account)
     case ConnectionService.connect(connection, connection_params) do
       {:ok, _} ->
         conn

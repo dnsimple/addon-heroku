@@ -9,24 +9,22 @@ defmodule HerokuConnector.ConnectionService do
   Connect the DNSimple domain to the Heroku application using the configuration details
   found in `model`.
   """
-  def connect(model, connection_params \\ %{}) do
-    model = Repo.preload(model, :account)
-
-    domain = HerokuConnector.Dnsimple.domain(model.account, model.dnsimple_domain_id)
-    app = HerokuConnector.Heroku.app(model.account, model.heroku_app_id)
+  def connect(connection, connection_params \\ %{}) do
+    domain = HerokuConnector.Dnsimple.domain(connection.account, connection.dnsimple_domain_id)
+    app = HerokuConnector.Heroku.app(connection.account, connection.heroku_app_id)
 
     case Map.get(connection_params, "dnsimple_certificate_id") do
       # No certificate is present
       nil ->
-        dnsimple_connect_results = connect_dnsimple(model.account, domain.name, URI.parse(app.web_url).host)
-        heroku_connect_results = connect_heroku(model.account, domain.name, app.id)
-        Connection.save_connection_data(model, dnsimple_connect_results, heroku_connect_results)
+        dnsimple_connect_results = connect_dnsimple(connection.account, domain.name, URI.parse(app.web_url).host)
+        heroku_connect_results = connect_heroku(connection.account, domain.name, app.id)
+        Connection.save_connection_data(connection, dnsimple_connect_results, heroku_connect_results)
 
         case Enum.all?(dnsimple_connect_results ++ heroku_connect_results, success_fn) do
           true ->
-            {:ok, model}
+            {:ok, connection}
           false ->
-            Connection.get!(model.account, model.id)
+            Connection.get!(connection.account, connection.id)
             |> disconnect!
             |> Connection.delete!
             {:error, dnsimple_connect_results ++ heroku_connect_results}
@@ -34,17 +32,17 @@ defmodule HerokuConnector.ConnectionService do
 
       # Certificate present
       dnsimple_certificate_id ->
-        case enable_heroku_ssl_endpoint(model.account, model.dnsimple_domain_id, app.id, dnsimple_certificate_id) do
+        case enable_heroku_ssl_endpoint(connection.account, connection.dnsimple_domain_id, app.id, dnsimple_certificate_id) do
           {:ok, ssl_endpoint} ->
-            dnsimple_connect_results = connect_dnsimple(model.account, domain.name, ssl_endpoint.cname)
-            heroku_connect_results = connect_heroku(model.account, domain.name, app.id)
-            Connection.save_connection_data(model, dnsimple_connect_results, heroku_connect_results, ssl_endpoint.id)
+            dnsimple_connect_results = connect_dnsimple(connection.account, domain.name, ssl_endpoint.cname)
+            heroku_connect_results = connect_heroku(connection.account, domain.name, app.id)
+            Connection.save_connection_data(connection, dnsimple_connect_results, heroku_connect_results, ssl_endpoint.id)
 
             case Enum.all?(dnsimple_connect_results ++ heroku_connect_results, success_fn) do
               true ->
-                {:ok, model}
+                {:ok, connection}
               false ->
-                Connection.get!(model.account, model.id)
+                Connection.get!(connection.account, connection.id)
                 |> disconnect!
                 |> Connection.delete!
                 {:error, dnsimple_connect_results ++ heroku_connect_results}
@@ -129,39 +127,39 @@ defmodule HerokuConnector.ConnectionService do
   disconnected and connected.
   """
   def reconnect(changeset, connection_params \\ %{}) do
-    model = changeset.data |> Repo.preload(:account)
-    domain = HerokuConnector.Dnsimple.domain(model.account, model.dnsimple_domain_id)
-    app = HerokuConnector.Heroku.app(model.account, model.heroku_app_id)
+    connection = changeset.data |> Repo.preload(:account)
+    domain = HerokuConnector.Dnsimple.domain(connection.account, connection.dnsimple_domain_id)
+    app = HerokuConnector.Heroku.app(connection.account, connection.heroku_app_id)
     new_domain = case Map.get(changeset.changes, :dnsimple_domain_id) do
       nil -> domain
-      dnsimple_domain_id ->  HerokuConnector.Dnsimple.domain(model.account, dnsimple_domain_id)
+      dnsimple_domain_id ->  HerokuConnector.Dnsimple.domain(connection.account, dnsimple_domain_id)
     end
     new_app = case Map.get(changeset.changes, :heroku_app_id) do
       nil -> app
-      heroku_app_id ->  HerokuConnector.Heroku.app(model.account, heroku_app_id)
+      heroku_app_id ->  HerokuConnector.Heroku.app(connection.account, heroku_app_id)
     end
 
     case domain.id != new_domain.id or app.id != new_app.id do
       true ->
         # something has changed so it's time to reconnect
-        if model.connection_data.ssl_endpoint_id != nil do
-          disable_heroku_ssl_endpoint!(model.account, app.id, model.connection_data.ssl_endpoint_id)
+        if connection.connection_data.ssl_endpoint_id != nil do
+          disable_heroku_ssl_endpoint!(connection.account, app.id, connection.connection_data.ssl_endpoint_id)
         end
 
         case Map.get(connection_params, "dnsimple_certificate_id") do
           nil ->
             # no certificate id is present
-            dnsimple_connect_results = reconnect_dnsimple(model, domain, app, new_domain, new_app, URI.parse(new_app.web_url).host)
-            heroku_connect_results = reconnect_heroku(model, domain, app, new_domain, new_app)
-            Connection.save_connection_data(model, dnsimple_connect_results, heroku_connect_results)
+            dnsimple_connect_results = reconnect_dnsimple(connection, domain, app, new_domain, new_app, URI.parse(new_app.web_url).host)
+            heroku_connect_results = reconnect_heroku(connection, domain, app, new_domain, new_app)
+            Connection.save_connection_data(connection, dnsimple_connect_results, heroku_connect_results)
             {:ok, dnsimple_connect_results ++ heroku_connect_results}
           dnsimple_certificate_id ->
             # certificate id is present
-            case enable_heroku_ssl_endpoint(model.account, new_domain.id, new_app.id, dnsimple_certificate_id) do
+            case enable_heroku_ssl_endpoint(connection.account, new_domain.id, new_app.id, dnsimple_certificate_id) do
               {:ok, ssl_endpoint} ->
-                dnsimple_connect_results = reconnect_dnsimple(model, domain, app, new_domain, new_app, ssl_endpoint.cname)
-                heroku_connect_results = reconnect_heroku(model, domain, app, new_domain, new_app)
-                Connection.save_connection_data(model, dnsimple_connect_results, heroku_connect_results)
+                dnsimple_connect_results = reconnect_dnsimple(connection, domain, app, new_domain, new_app, ssl_endpoint.cname)
+                heroku_connect_results = reconnect_heroku(connection, domain, app, new_domain, new_app)
+                Connection.save_connection_data(connection, dnsimple_connect_results, heroku_connect_results)
                 {:ok, dnsimple_connect_results ++ heroku_connect_results}
               {:error, error} ->
                 IO.inspect("Error enabling SSL endpoint: #{inspect error}")
@@ -173,14 +171,14 @@ defmodule HerokuConnector.ConnectionService do
     end
   end
 
-  defp reconnect_dnsimple(model, domain, _app, new_domain, _new_app, hostname) do
-    disconnect_dnsimple!(model.account, domain.name, model.connection_data.dnsimple_record_ids)
-    connect_dnsimple(model.account, new_domain.name, hostname)
+  defp reconnect_dnsimple(connection, domain, _app, new_domain, _new_app, hostname) do
+    disconnect_dnsimple!(connection.account, domain.name, connection.connection_data.dnsimple_record_ids)
+    connect_dnsimple(connection.account, new_domain.name, hostname)
   end
 
-  defp reconnect_heroku(model, _domain, app, new_domain, new_app) do
-    disconnect_heroku!(model.account, app.id, model.connection_data.heroku_domain_ids)
-    connect_heroku(model.account, new_domain.name, new_app.id)
+  defp reconnect_heroku(connection, _domain, app, new_domain, new_app) do
+    disconnect_heroku!(connection.account, app.id, connection.connection_data.heroku_domain_ids)
+    connect_heroku(connection.account, new_domain.name, new_app.id)
   end
 
 
@@ -188,23 +186,23 @@ defmodule HerokuConnector.ConnectionService do
 
   @doc """
   Disconnect the DNSimple domain from the Heroku application using the configuration
-  details found in `model`.
+  details found in `connection`.
   """
-  def disconnect!(model) do
-    model = Repo.preload(model, :account)
-    domain = HerokuConnector.Dnsimple.domain(model.account, model.dnsimple_domain_id)
-    app = HerokuConnector.Heroku.app(model.account, model.heroku_app_id)
+  def disconnect!(connection) do
+    connection = Repo.preload(connection, :account)
+    domain = HerokuConnector.Dnsimple.domain(connection.account, connection.dnsimple_domain_id)
+    app = HerokuConnector.Heroku.app(connection.account, connection.heroku_app_id)
 
-    if model.connection_data != nil do
-      if model.connection_data.ssl_endpoint_id != nil do
-        disable_heroku_ssl_endpoint!(model.account, app.id, model.connection_data.ssl_endpoint_id)
+    if connection.connection_data != nil do
+      if connection.connection_data.ssl_endpoint_id != nil do
+        disable_heroku_ssl_endpoint!(connection.account, app.id, connection.connection_data.ssl_endpoint_id)
       end
-      disconnect_dnsimple!(model.account, domain.name, model.connection_data.dnsimple_record_ids)
-      disconnect_heroku!(model.account, app.id, model.connection_data.heroku_domain_ids)
+      disconnect_dnsimple!(connection.account, domain.name, connection.connection_data.dnsimple_record_ids)
+      disconnect_heroku!(connection.account, app.id, connection.connection_data.heroku_domain_ids)
 
-      model |> Connection.clear_connection_data!
+      connection |> Connection.clear_connection_data!
     else
-      model
+      connection
     end
   end
 
