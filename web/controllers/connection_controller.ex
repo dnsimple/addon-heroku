@@ -3,6 +3,7 @@ defmodule HerokuConnector.ConnectionController do
   require Logger
 
   alias HerokuConnector.Connection
+  alias HerokuConnector.ConnectionService
 
   plug HerokuConnector.Plug.CurrentAccount
   plug :scrub_params, "connection" when action in [:create, :update]
@@ -43,7 +44,7 @@ defmodule HerokuConnector.ConnectionController do
   def connect(conn, %{"id" => id, "connection" => connection_params}) do
     account = conn.assigns[:current_account]
     connection = Connection.get!(account, id)
-    case Connection.connect(connection, connection_params) do
+    case ConnectionService.connect(connection, connection_params) do
       {:ok, _} ->
         conn
         |> put_flash(:info, "Connection created successfully.")
@@ -110,7 +111,7 @@ defmodule HerokuConnector.ConnectionController do
     case HerokuConnector.Dnsimple.active_certificates(account, new_domain.id) do
       [] ->
         # No certificates on the target domain, reconnect immediately
-        case Connection.reconnect(changeset) do
+        case ConnectionService.reconnect(changeset) do
           {:ok, _} ->
             case Connection.update(changeset) do
               {:ok, new_connection} ->
@@ -130,7 +131,7 @@ defmodule HerokuConnector.ConnectionController do
             render(conn, "reconnect.html", changeset: changeset, connection: connection, dnsimple_domain: new_domain, dnsimple_certificates: certificates)
           _certificate_id ->
             # Certificates on the target domain and certificate id passed
-            case Connection.reconnect(changeset, connection_params) do
+            case ConnectionService.reconnect(changeset, connection_params) do
               {:ok, _} ->
                 case Connection.update(changeset) do
                   {:ok, new_connection} ->
@@ -150,7 +151,7 @@ defmodule HerokuConnector.ConnectionController do
   def delete(conn, %{"id" => id}) do
     conn.assigns[:current_account]
     |> Connection.get!(id)
-    |> Connection.disconnect!
+    |> ConnectionService.disconnect!
     |> Connection.delete!
 
     conn

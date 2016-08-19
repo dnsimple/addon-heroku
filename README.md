@@ -2,6 +2,11 @@
 
 This web service provides a means to connect DNSimple domains with Heroku applications.
 
+## Structure
+
+`gateways` - This directory holds modules that deal with external APIs
+`services` - Functions that implement business logic
+
 ## Running Locally
 
 To start the Heroku Connector app:
