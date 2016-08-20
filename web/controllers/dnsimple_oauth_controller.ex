@@ -13,6 +13,10 @@ defmodule HerokuConnector.DnsimpleOauthController do
   end
 
   def create(conn, params) do
+    if params["state"] != get_session(conn, :dnsimple_oauth_state) do
+      raise "State does not match"
+    end
+
     client = %Dnsimple.Client{}
     attributes = %{
       client_id: Application.fetch_env!(:heroku_connector, :dnsimple_client_id),
