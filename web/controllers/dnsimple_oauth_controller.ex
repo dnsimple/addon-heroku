@@ -3,12 +3,13 @@ defmodule HerokuConnector.DnsimpleOauthController do
 
   alias HerokuConnector.Account
 
-  @state "12345678"
-
   def new(conn, _params) do
     client    = %Dnsimple.Client{}
     client_id = Application.fetch_env!(:heroku_connector, :dnsimple_client_id)
-    oauth_url = HerokuConnector.Dnsimple.authorize_url(client, client_id, state: @state)
+    state = :crypto.strong_rand_bytes(8) |> Base.url_encode64 |> binary_part(0, 8)
+    conn = put_session(conn, :dnsimple_oauth_state, state)
+    #conn = assign(conn, :dnsimple_oauth_state, state)
+    oauth_url = HerokuConnector.Dnsimple.authorize_url(client, client_id, state: state)
     redirect(conn, external: oauth_url)
   end
 
@@ -66,4 +67,3 @@ defmodule HerokuConnector.DnsimpleOauthController do
   end
 
 end
-
