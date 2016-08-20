@@ -88,24 +88,5 @@ defmodule HerokuConnector.ConnectionTest do
     assert Repo.get(Connection, connection.id) == nil
   end
 
-  # External integration
-  test "connect", %{account: account} do
-    connection = Connection.create!(%Connection{account_id: account.id}, @valid_attrs)
-    {:ok, _} = Connection.connect(connection)
-  end
-
-  test "reconnect", %{account: account} do
-    new_domain_id = "123"
-    connection = Connection.create!(%Connection{account_id: account.id}, @valid_attrs)
-    changeset = Connection.changeset(connection, %{@valid_attrs| dnsimple_domain_id: new_domain_id})
-    {:ok, []} = Connection.reconnect(changeset)
-  end
-
-  test "disconnect!", %{account: account} do
-    connection_data = %HerokuConnector.Connection.ConnectionData{dnsimple_record_ids: [1]}
-    connection = Connection.create!(%Connection{account_id: account.id, connection_data: connection_data}, @valid_attrs)
-    connection = Connection.disconnect!(connection)
-    assert connection != nil
-    assert connection.connection_data.dnsimple_record_ids == []
-  end
+  
 end

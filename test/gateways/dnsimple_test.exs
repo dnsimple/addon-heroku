@@ -1,5 +1,5 @@
 defmodule HerokuConnector.DnsimpleTest do
-  use HerokuConnector.ModelCase
+  use HerokuConnector.GatewayCase
 
   alias HerokuConnector.Account
 
