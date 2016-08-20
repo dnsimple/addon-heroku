@@ -1,5 +1,5 @@
 defmodule Heroku.ConnectionServiceTest do
-  use HerokuConnector.ModelCase
+  use HerokuConnector.ServiceCase
 
   alias HerokuConnector.Connection
   alias HerokuConnector.ConnectionService
