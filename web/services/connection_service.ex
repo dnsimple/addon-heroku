@@ -189,7 +189,6 @@ defmodule HerokuConnector.ConnectionService do
   details found in `connection`.
   """
   def disconnect!(connection) do
-    connection = Repo.preload(connection, :account)
     domain = HerokuConnector.Dnsimple.domain(connection.account, connection.dnsimple_domain_id)
     app = HerokuConnector.Heroku.app(connection.account, connection.heroku_app_id)
 
