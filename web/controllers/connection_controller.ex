@@ -126,7 +126,7 @@ defmodule HerokuConnector.ConnectionController do
         end
       certificates ->
         case Map.get(connection_params, "dnsimple_certificate_id") do
-          nil ->
+          "0" ->
             # Certificates on the target domain and no certificate id passed
             render(conn, "reconnect.html", changeset: changeset, connection: connection, dnsimple_domain: new_domain, dnsimple_certificates: certificates)
           _certificate_id ->

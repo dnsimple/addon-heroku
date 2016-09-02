@@ -15,7 +15,7 @@ defmodule HerokuConnector.ConnectionService do
 
     case Map.get(connection_params, "dnsimple_certificate_id") do
       # No certificate is present
-      nil ->
+      "0" ->
         dnsimple_connect_results = connect_dnsimple(connection.account, domain.name, URI.parse(app.web_url).host)
         heroku_connect_results = connect_heroku(connection.account, domain.name, app.id)
         Connection.save_connection_data(connection, dnsimple_connect_results, heroku_connect_results)
