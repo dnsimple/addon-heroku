@@ -50,7 +50,7 @@ defmodule HerokuConnector.ConnectionTest do
     assert Connection.get_by_dnsimple_domain_id("example.com").id == connection.id
   end
 
-  test "get_by_dnsimple_domain_id with a non-existant domain id", %{account: account} do
+  test "get_by_dnsimple_domain_id with a non-existant domain id", %{account: _account} do
     assert Connection.get_by_dnsimple_domain_id("0") == nil
   end
 
@@ -59,7 +59,7 @@ defmodule HerokuConnector.ConnectionTest do
     assert Connection.get_by_dnsimple_domain_id!("example.com").id == connection.id
   end
 
-  test "get_by_dnsimple_domain_id! with a non-existent domain id", %{account: account} do
+  test "get_by_dnsimple_domain_id! with a non-existent domain id", %{account: _account} do
     assert_raise Ecto.NoResultsError, fn ->
       Connection.get_by_dnsimple_domain_id!("0")
     end
