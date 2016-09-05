@@ -40,7 +40,7 @@ defmodule HerokuConnector.Mixfile do
      {:timex, "~> 2.1.6"},
      {:timex_ecto, ">= 0.0.0"},
      {:dnsimple, git: "https://github.com/dnsimple/dnsimple-elixir.git"},
-     {:happi, git: "https://github.com/aeden/happi.git"},
+     {:happi, git: "https://github.com/aeden/happi.git", tag: "0.0.2"},
      {:oauth2, "~> 0.5"}]
   end
 
