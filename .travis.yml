@@ -1,4 +1,6 @@
 language: elixir
+sudo: required
+dist: trusty
 
 elixir:
 - 1.3.0
