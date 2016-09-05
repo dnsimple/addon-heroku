@@ -39,6 +39,10 @@ defmodule HerokuConnector.Account do
     Repo.get!(Account, id)
   end
 
+  def get_by_dnsimple_account_id(dnsimple_account_id) do
+    Repo.get_by(Account, %{dnsimple_account_id: dnsimple_account_id})
+  end
+
   def find_or_create(dnsimple_account_id, params \\ %{}) do
     case Repo.get_by(Account, dnsimple_account_id: dnsimple_account_id) do
       nil -> create(%Account{dnsimple_account_id: dnsimple_account_id}, params)

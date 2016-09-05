@@ -26,11 +26,19 @@ defmodule HerokuConnector.Heroku.AddonsServiceMock do
   def delete(_client, id) do
     %Happi.Heroku.Addon{id: id}
   end
+
+  def get(_client, id) do
+    %Happi.Heroku.Addon{id: id}
+  end
 end
 
 defmodule HerokuConnector.Heroku.SslEndpointsServiceMock do
   def create(_client, _map) do
     %Happi.Heroku.SslEndpoint{}
+  end
+
+  def update(_client, id, _map) do
+    %Happi.Heroku.SslEndpoint{id: id}
   end
 
   def delete(_client, id) do

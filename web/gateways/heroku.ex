@@ -3,6 +3,8 @@ defmodule HerokuConnector.Heroku do
 
   alias HerokuConnector.Account
 
+  require Logger
+
   # Apps
 
   @doc """
@@ -22,17 +24,30 @@ defmodule HerokuConnector.Heroku do
   # Add-on attachments
 
   def create_addon(account, app_id, addon_id) do
-    addon_service.create(client(account, app_id), %{"plan" => addon_id})
+    IO.inspect(addon_service.create(client(account, app_id), %{"plan" => addon_id}))
   end
 
   def delete_addon(account, app_id, addon_id) do
     addon_service.delete(client(account, app_id), addon_id)
   end
 
+  def addon_enabled?(account, app_id, addon_id) do
+    case IO.inspect(addon_service.get(client(account, app_id), addon_id)) do
+      %Happi.Heroku.Error{code: 404} -> false
+      _ -> true
+    end
+  end
+
   # SSL Endpoints
 
   def create_ssl_endpoint(account, app_id, certificate_chain, private_key) do
     ssl_endpoint_service.create(client(account, app_id), %{"certificate_chain" => certificate_chain, "private_key" => private_key})
+  end
+
+  def update_ssl_endpoint(account, app_id, certificate_chain, private_key, ssl_endpoint_id) do
+    params = %{"certificate_chain" => certificate_chain, "private_key" => private_key}
+    result = ssl_endpoint_service.update(client(account, app_id), ssl_endpoint_id, params)
+    IO.inspect(result)
   end
 
   def delete_ssl_endpoint(account, app_id, ssl_endpoint_id) do

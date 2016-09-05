@@ -4,7 +4,7 @@ defmodule HerokuConnector.ConnectionTest do
   alias HerokuConnector.Connection
   alias HerokuConnector.Account
 
-  @valid_attrs %{dnsimple_domain_id: "123", heroku_app_id: "ABC"}
+  @valid_attrs %{dnsimple_domain_id: "example.com", heroku_app_id: "ABC"}
   @invalid_attrs %{}
 
   setup do
@@ -42,6 +42,26 @@ defmodule HerokuConnector.ConnectionTest do
   test "get! with a non-existant id", %{account: account} do
     assert_raise Ecto.NoResultsError, fn ->
       Connection.get!(account, "0")
+    end
+  end
+
+  test "get_by_dnsimple_domain_id with an existing domain id", %{account: account} do
+    connection = Connection.create!(%Connection{account_id: account.id}, @valid_attrs)
+    assert Connection.get_by_dnsimple_domain_id("example.com").id == connection.id
+  end
+
+  test "get_by_dnsimple_domain_id with a non-existant domain id", %{account: account} do
+    assert Connection.get_by_dnsimple_domain_id("0") == nil
+  end
+
+  test "get_by_dnsimple_domain_id! with an existing domain id", %{account: account} do
+    connection = Connection.create!(%Connection{account_id: account.id}, @valid_attrs)
+    assert Connection.get_by_dnsimple_domain_id!("example.com").id == connection.id
+  end
+
+  test "get_by_dnsimple_domain_id! with a non-existent domain id", %{account: account} do
+    assert_raise Ecto.NoResultsError, fn ->
+      Connection.get_by_dnsimple_domain_id!("0")
     end
   end
 

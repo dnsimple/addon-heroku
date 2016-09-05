@@ -62,6 +62,16 @@ defmodule HerokuConnector.Connection do
     Repo.get!(query, id) |> Repo.preload(:account)
   end
 
+  def get_by_dnsimple_domain_id(dnsimple_domain_id) do
+    query = from c in Connection, where: c.dnsimple_domain_id == ^dnsimple_domain_id, preload: [:account]
+    Repo.one(query)
+  end
+
+  def get_by_dnsimple_domain_id!(dnsimple_domain_id) do
+    query = from c in Connection, where: c.dnsimple_domain_id == ^dnsimple_domain_id, preload: [:account]
+    Repo.one!(query) |> Repo.preload(:account)
+  end
+
   def all(account) do
     query = from c in Connection, where: c.account_id == ^account.id
     Repo.all(query)
