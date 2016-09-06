@@ -10,9 +10,7 @@ defmodule HerokuConnector.WebhookController do
     HerokuConnector.WebhookRequestTracker.handle(request_identifier, fn() ->
       case name do
         "certificate.issue" ->
-          spawn(fn() ->
-            install_certificate(account_id, data)
-          end)
+          install_certificate(account_id, data)
         "certificate.reissue" ->
           install_certificate(account_id, data)
         _ -> :ok
