@@ -6,7 +6,7 @@ defmodule HerokuConnector.WebhookRequestTracker do
   end
 
   def handle(request_identifier, callback) do
-    GenServer.call(WebhookRequestTracker, {:handle, request_identifier, callback})
+    GenServer.call(WebhookRequestTracker, {:handle, request_identifier, callback}, 10000)
   end
 
   # GenServer callbacks
