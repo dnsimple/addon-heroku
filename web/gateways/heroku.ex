@@ -45,8 +45,10 @@ defmodule HerokuConnector.Heroku do
   end
 
   def update_ssl_endpoint(account, app_id, certificate_chain, private_key, ssl_endpoint_id) do
+    Logger.info("update ssl endpoint #{inspect ssl_endpoint_id} in app #{app_id}")
     params = %{"certificate_chain" => certificate_chain, "private_key" => private_key}
-    ssl_endpoint_service.update(client(account, app_id), ssl_endpoint_id, params)
+    result = ssl_endpoint_service.update(client(account, app_id), ssl_endpoint_id, params)
+    IO.inspect(result)
   end
 
   def delete_ssl_endpoint(account, app_id, ssl_endpoint_id) do
