@@ -17,10 +17,37 @@ defmodule HerokuConnector.ConnectionService do
 
     case Map.get(connection_params, "dnsimple_certificate_id") do
       # No certificate is present
-      "0" ->
-        dnsimple_connect_results = connect_dnsimple(connection.account, domain.name, URI.parse(app.web_url).host)
+      nil -> connect_without_certificate(connection, domain, app)
+      "0" -> connect_without_certificate(connection, domain, app)
+
+      # Certificate present
+      dnsimple_certificate_id ->
+        connect_with_certificate(connection, domain, app, dnsimple_certificate_id)
+    end
+  end
+
+  defp connect_without_certificate(connection, domain, app) do
+    dnsimple_connect_results = connect_dnsimple(connection.account, domain.name, URI.parse(app.web_url).host)
+    heroku_connect_results = connect_heroku(connection.account, domain.name, app.id)
+    Connection.save_connection_data(connection, dnsimple_connect_results, heroku_connect_results)
+
+    case Enum.all?(dnsimple_connect_results ++ heroku_connect_results, success_fn) do
+      true ->
+        {:ok, connection}
+      false ->
+        Connection.get!(connection.account, connection.id)
+        |> disconnect!
+        |> Connection.delete!
+        {:error, dnsimple_connect_results ++ heroku_connect_results}
+    end
+  end
+
+  defp connect_with_certificate(connection, domain, app, dnsimple_certificate_id) do
+    case enable_heroku_ssl_endpoint(connection.account, connection.dnsimple_domain_id, app.id, dnsimple_certificate_id, nil) do
+      {:ok, ssl_endpoint} ->
+        dnsimple_connect_results = connect_dnsimple(connection.account, domain.name, ssl_endpoint.cname)
         heroku_connect_results = connect_heroku(connection.account, domain.name, app.id)
-        Connection.save_connection_data(connection, dnsimple_connect_results, heroku_connect_results)
+        Connection.save_connection_data(connection, dnsimple_connect_results, heroku_connect_results, ssl_endpoint.id)
 
         case Enum.all?(dnsimple_connect_results ++ heroku_connect_results, success_fn) do
           true ->
@@ -31,28 +58,9 @@ defmodule HerokuConnector.ConnectionService do
             |> Connection.delete!
             {:error, dnsimple_connect_results ++ heroku_connect_results}
         end
-
-      # Certificate present
-      dnsimple_certificate_id ->
-        case enable_heroku_ssl_endpoint(connection.account, connection.dnsimple_domain_id, app.id, dnsimple_certificate_id, nil) do
-          {:ok, ssl_endpoint} ->
-            dnsimple_connect_results = connect_dnsimple(connection.account, domain.name, ssl_endpoint.cname)
-            heroku_connect_results = connect_heroku(connection.account, domain.name, app.id)
-            Connection.save_connection_data(connection, dnsimple_connect_results, heroku_connect_results, ssl_endpoint.id)
-
-            case Enum.all?(dnsimple_connect_results ++ heroku_connect_results, success_fn) do
-              true ->
-                {:ok, connection}
-              false ->
-                Connection.get!(connection.account, connection.id)
-                |> disconnect!
-                |> Connection.delete!
-                {:error, dnsimple_connect_results ++ heroku_connect_results}
-            end
-          {:error, error} ->
-            IO.inspect("Error enabling SSL endpoint: #{inspect error}")
-            {:error, error}
-        end
+      {:error, error} ->
+        IO.inspect("Error enabling SSL endpoint: #{inspect error}")
+        {:error, error}
     end
   end
 
