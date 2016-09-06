@@ -19,7 +19,7 @@ defmodule HerokuConnector.Mixfile do
   def application do
     [mod: {HerokuConnector, []},
      applications: [:phoenix, :phoenix_html, :cowboy, :logger, :gettext,
-                    :phoenix_ecto, :postgrex, :timex, :dnsimple, :oauth2, :happi]]
+                    :phoenix_ecto, :postgrex, :dnsimple, :oauth2, :happi]]
   end
 
   # Specifies which paths to compile per environment.
@@ -37,8 +37,6 @@ defmodule HerokuConnector.Mixfile do
      {:phoenix_live_reload, "~> 1.0", only: :dev},
      {:gettext, "~> 0.9"},
      {:cowboy, "~> 1.0"},
-     {:timex, "~> 3.0"},
-     {:timex_ecto, ">= 0.0.0"},
      {:dnsimple, git: "https://github.com/dnsimple/dnsimple-elixir.git"},
      {:happi, git: "https://github.com/aeden/happi.git", tag: "0.0.3"},
      {:oauth2, "~> 0.7"}]
