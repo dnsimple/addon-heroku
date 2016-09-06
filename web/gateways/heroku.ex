@@ -117,7 +117,7 @@ defmodule HerokuConnector.Heroku do
   end
 
   defp access_token_expired?(account) do
-    account.heroku_access_token_expires_at != nil and Timex.after?(DateTime.now, account.heroku_access_token_expires_at)
+    account.heroku_access_token_expires_at != nil and Timex.after?(DateTime.utc_now, account.heroku_access_token_expires_at)
   end
 
   defp do_refresh_access_token(account) do
@@ -125,7 +125,7 @@ defmodule HerokuConnector.Heroku do
       {:ok, response} ->
         changeset = Account.changeset(account, %{
           "heroku_access_token" => response.access_token,
-          "heroku_access_token_expires_at" => DateTime.from_seconds(response.expires_at),
+          "heroku_access_token_expires_at" => DateTime.from_unix(response.expires_at),
           "heroku_refresh_token" => response.refresh_token
         })
         Account.update!(changeset)

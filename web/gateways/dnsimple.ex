@@ -2,7 +2,7 @@ defmodule HerokuConnector.Dnsimple do
   # OAuth
 
   def authorize_url(client, client_id, options) do
-    Dnsimple.OauthService.authorize_url(client, client_id, state: options[:state])
+    Dnsimple.Oauth.authorize_url(client, client_id, state: options[:state])
   end
 
   def exchange_authorization_for_token(client, attributes) do
@@ -144,30 +144,30 @@ defmodule HerokuConnector.Dnsimple do
   # Service modules
 
   defp oauth_service do
-    Application.get_env(:heroku_connector, :dnsimple_oauth_service, Dnsimple.OauthService)
+    Application.get_env(:heroku_connector, :dnsimple_oauth_service, Dnsimple.Oauth)
   end
 
   defp identity_service do
-    Application.get_env(:heroku_connector, :dnsimple_identity_service, Dnsimple.IdentityService)
+    Application.get_env(:heroku_connector, :dnsimple_identity_service, Dnsimple.Identity)
   end
 
   defp domain_service do
-    Application.get_env(:heroku_connector, :dnsimple_domains_service, Dnsimple.DomainsService)
+    Application.get_env(:heroku_connector, :dnsimple_domains_service, Dnsimple.Domains)
   end
 
   defp domain_certificate_service do
-    Application.get_env(:heroku_connector, :dnsimple_domain_certificates_service, Dnsimple.DomainCertificatesService)
+    Application.get_env(:heroku_connector, :dnsimple_domain_certificates_service, Dnsimple.DomainCertificates)
   end
 
   defp domain_service_service do
-    Application.get_env(:heroku_connector, :dnsimple_domain_services_service, Dnsimple.DomainServicesService)
+    Application.get_env(:heroku_connector, :dnsimple_domain_services_service, Dnsimple.DomainServices)
   end
 
   defp webhook_service do
-    Application.get_env(:heroku_connector, :dnsimple_webhooks_service, Dnsimple.WebhooksService)
+    Application.get_env(:heroku_connector, :dnsimple_webhooks_service, Dnsimple.Webhooks)
   end
 
   defp zone_service do
-    Application.get_env(:heroku_connector, :dnsimple_zones_service, Dnsimple.ZonesService)
+    Application.get_env(:heroku_connector, :dnsimple_zones_service, Dnsimple.Zones)
   end
 end

@@ -9,7 +9,7 @@ defmodule HerokuConnector.AccountControllerTest do
     {:ok, account: account}
   end
 
-  test "disconnects account", %{account: account} do
+  test "disconnects account", %{conn: conn, account: account} do
     conn =  conn |> assign(:current_account, account) |> delete(account_path(conn, :delete))
     assert html_response(conn, 200) =~ "Account disconnected"
   end
