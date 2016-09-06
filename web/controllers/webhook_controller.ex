@@ -36,7 +36,9 @@ defmodule HerokuConnector.WebhookController do
       nil ->
         Logger.error("Account not found for id #{account_id}")
       account ->
-        Logger.info("Found account: #{inspect account}")
+        Logger.info("Found account: #{inspect account}, refreshing token")
+        account = HerokuConnector.Heroku.refresh_access_token(account)
+        Logger.info("Heroku token refreshed")
         dnsimple_domain_id = data["certificate"]["domain_id"]
         domain = HerokuConnector.Dnsimple.domain(account, dnsimple_domain_id)
 
