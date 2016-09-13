@@ -19,7 +19,7 @@ defmodule HerokuConnector.Mixfile do
   def application do
     [mod: {HerokuConnector, []},
      applications: [:phoenix, :phoenix_html, :cowboy, :logger, :gettext,
-                    :phoenix_ecto, :postgrex, :timex, :dnsimple, :oauth2, :happi]]
+                    :phoenix_ecto, :postgrex, :dnsimple, :oauth2, :happi]]
   end
 
   # Specifies which paths to compile per environment.
@@ -30,18 +30,16 @@ defmodule HerokuConnector.Mixfile do
   #
   # Type `mix help deps` for examples and options.
   defp deps do
-    [{:phoenix, "~> 1.1.4"},
-     {:postgrex, ">= 0.0.0"},
-     {:phoenix_ecto, "~> 3.0.0-rc"},
+    [{:phoenix, "~> 1.2"},
+     {:postgrex, "~> 0.11.2"},
+     {:phoenix_ecto, "~> 3.0"},
      {:phoenix_html, "~> 2.4"},
      {:phoenix_live_reload, "~> 1.0", only: :dev},
      {:gettext, "~> 0.9"},
      {:cowboy, "~> 1.0"},
-     {:timex, "~> 2.1.6"},
-     {:timex_ecto, ">= 0.0.0"},
      {:dnsimple, git: "https://github.com/dnsimple/dnsimple-elixir.git"},
-     {:happi, git: "https://github.com/aeden/happi.git", tag: "0.0.2"},
-     {:oauth2, "~> 0.5"}]
+     {:happi, git: "https://github.com/aeden/happi.git", tag: "0.0.3"},
+     {:oauth2, "~> 0.7"}]
   end
 
   # Aliases are shortcut or tasks specific to the current project.
