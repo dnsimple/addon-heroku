@@ -3,10 +3,6 @@ defmodule HerokuConnector.PageControllerTest do
 
   alias HerokuConnector.Account
 
-  setup do
-    :ok = Ecto.Adapters.SQL.Sandbox.checkout(HerokuConnector.Repo)
-  end
-
   test "GET /", %{conn: conn} do
     conn = get conn, "/"
     assert redirected_to(conn) == dnsimple_oauth_path(conn, :new)

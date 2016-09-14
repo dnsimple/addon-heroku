@@ -9,7 +9,6 @@ defmodule Heroku.ConnectionServiceTest do
   @invalid_attrs %{}
 
   setup do
-    :ok = Ecto.Adapters.SQL.Sandbox.checkout(Repo)
     {:ok, account} = Account.create(%Account{dnsimple_account_id: "1"})
     {:ok, account: account}
   end

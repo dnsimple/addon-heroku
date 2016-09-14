@@ -3,6 +3,7 @@ defmodule HerokuConnector.ServiceCase do
 
   using do
     quote do
+      use HerokuConnector.ConnCase
       alias HerokuConnector.Repo
       import HerokuConnector.ServiceCase
     end

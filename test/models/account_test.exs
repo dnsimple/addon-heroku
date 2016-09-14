@@ -14,10 +14,6 @@ defmodule HerokuConnector.AccountTest do
     configuration: %{"webhook_id" => "1"}
   }
 
-  setup do
-    :ok = Ecto.Adapters.SQL.Sandbox.checkout(Repo)
-  end
-
   test "create with valid attributes" do
     {:ok, account} = Account.create(%Account{}, @valid_attrs) 
     assert account.dnsimple_account_id == @valid_attrs[:dnsimple_account_id]

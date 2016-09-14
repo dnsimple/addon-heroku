@@ -2,7 +2,6 @@ defmodule HerokuConnector.DnsimpleOauthControllerTest do
   use HerokuConnector.ConnCase
 
   setup do
-    :ok = Ecto.Adapters.SQL.Sandbox.checkout(HerokuConnector.Repo)
     {:ok, dnsimple_client_id: Application.fetch_env!(:heroku_connector, :dnsimple_client_id)}
   end
 
