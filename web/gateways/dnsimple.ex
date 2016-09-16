@@ -18,16 +18,11 @@ defmodule HerokuConnector.Dnsimple do
   # Domains
 
   def domains(account) do
-    case domains_service.domains(client(account), account.id) do
-      {:ok, response} -> response.data
-      {:error, error} ->
-        IO.inspect(error)
-        raise "Failed to retrieve domains: #{inspect error}"
-    end
+    domains_service.all_domains(client(account), account.id)
   end
 
   def domain(account, id) do
-    case domains_service.domain(client(account), account.id, id) do
+    case domains_service.get_domain(client(account), account.id, id) do
       {:ok, response} -> response.data
       {:error, error} ->
         IO.inspect(error)
@@ -38,7 +33,7 @@ defmodule HerokuConnector.Dnsimple do
   # Domain Certificates
 
   def certificates(account, domain_name) do
-    case certificates_service.certificates(client(account), account.id, domain_name) do
+    case certificates_service.list_certificates(client(account), account.id, domain_name) do
       {:ok, response} -> response.data
       {:error, error} ->
         IO.inspect(error)
@@ -51,7 +46,7 @@ defmodule HerokuConnector.Dnsimple do
   end
 
   def download_certificate(account, domain_name, certificate_id) do
-    case certificates_service.download(client(account), account.id, domain_name, certificate_id) do
+    case certificates_service.download_certificate(client(account), account.id, domain_name, certificate_id) do
       {:ok, response} -> response.data
       {:error, error} ->
         IO.inspect(error)

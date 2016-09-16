@@ -11,17 +11,21 @@ defmodule HerokuConnector.Dnsimple.IdentityMock do
 end
 
 defmodule HerokuConnector.Dnsimple.DomainsMock do
-  def domains(_client, _opts) do
+  def list_domains(_client, _opts) do
     {:ok, %Dnsimple.Response{data: []}}
   end
 
-  def domain(_client, _account_id, name) do
+  def all_domains(_client, _opts) do
+    []
+  end
+
+  def get_domain(_client, _account_id, name) do
     {:ok, %Dnsimple.Response{data: %Dnsimple.Domain{name: name}}}
   end
 end
 
 defmodule HerokuConnector.Dnsimple.DomainCertificatesMock do
-  def certificates(_client, _account_id, _name) do
+  def list_certificates(_client, _account_id, _name) do
     {:ok, %Dnsimple.Response{data: []}}
   end
 
@@ -29,7 +33,7 @@ defmodule HerokuConnector.Dnsimple.DomainCertificatesMock do
     {:ok, %Dnsimple.Response{data: []}}
   end
 
-  def download(_client, _account_id, _name, _certificate_id) do
+  def download_certificate(_client, _account_id, _name, _certificate_id) do
     {:ok, %Dnsimple.Response{data: %Dnsimple.Certificate{chain: "certificate-chain"}}}
   end
 
