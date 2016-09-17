@@ -38,7 +38,7 @@ defmodule HerokuConnector.Mixfile do
      {:gettext, "~> 0.9"},
      {:cowboy, "~> 1.0"},
      {:dnsimple, git: "https://github.com/dnsimple/dnsimple-elixir.git"},
-     {:happi, git: "https://github.com/aeden/happi.git", tag: "0.0.3"},
+     {:happi, git: "https://github.com/aeden/happi.git", tag: "0.0.4"},
      {:oauth2, "~> 0.7"}]
   end
 
