@@ -53,6 +53,23 @@ defmodule HerokuConnector.Heroku do
     ssl_endpoint_service.delete(client(account, app_id), ssl_endpoint_id)
   end
 
+  # SNI Endpoins
+
+  def create_sni_endpoint(account, app_id, certificate_chain, private_key) do
+    sni_endpoint_service.create(client(account, app_id), %{"certificate_chain" => certificate_chain, "private_key" => private_key})
+  end
+
+  def update_sni_endpoint(account, app_id, certificate_chain, private_key, endpoint_id) do
+    Logger.info("update ssl endpoint #{inspect endpoint_id} in app #{app_id}")
+    params = %{"certificate_chain" => certificate_chain, "private_key" => private_key}
+    result = sni_endpoint_service.update(client(account, app_id), endpoint_id, params)
+    IO.inspect(result)
+  end
+
+  def delete_sni_endpoint(account, app_id, endpoint_id) do
+    sni_endpoint_service.delete(client(account, app_id), endpoint_id)
+  end
+
   # Domains
 
   def create_domains(account, app_id, hostnames) do
@@ -90,6 +107,10 @@ defmodule HerokuConnector.Heroku do
 
   defp ssl_endpoint_service do
     Application.get_env(:heroku_connector, :heroku_ssl_endpoints_service, Happi.Heroku.SslEndpoint)
+  end
+
+  defp sni_endpoint_service do
+    Application.get_env(:heroku_connector, :heroku_sni_endpoints_service, Happi.Heroku.SniEndpoint)
   end
 
 
