@@ -37,7 +37,7 @@ defmodule HerokuConnector.Dnsimple.DomainCertificatesMock do
     {:ok, %Dnsimple.Response{data: %Dnsimple.Certificate{chain: "certificate-chain"}}}
   end
 
-  def private_key(_client, _account_id, _name, _certificate_id) do
+  def get_certificate_private_key(_client, _account_id, _name, _certificate_id) do
     {:ok, %Dnsimple.Response{data: %Dnsimple.Certificate{private_key: "private-key"}}}
   end
 end
@@ -64,7 +64,7 @@ end
 
 defmodule HerokuConnector.Dnsimple.ZonesMock do
   def create_zone_record(_client, _account_id, _zone_name, attributes) do
-    {:ok, %Dnsimple.Response{data: attributes}}
+    {:ok, %Dnsimple.Response{data: struct(Dnsimple.ZoneRecord, attributes)}}
   end
 
   def delete_zone_record(_client, _account_id, _zone_name, id) do

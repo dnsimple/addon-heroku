@@ -9,7 +9,7 @@ defmodule HerokuConnector.ConnectionService do
 
   @doc """
   Connect the DNSimple domain to the Heroku application using the configuration details
-  found in `model`.
+  found in `connection`.
   """
   def connect(connection, connection_params \\ %{}) do
     domain = HerokuConnector.Dnsimple.domain(connection.account, connection.dnsimple_domain_id)
@@ -45,7 +45,12 @@ defmodule HerokuConnector.ConnectionService do
   defp connect_with_certificate(connection, domain, app, dnsimple_certificate_id) do
     case enable_heroku_ssl_endpoint(connection.account, connection.dnsimple_domain_id, app.id, dnsimple_certificate_id, nil) do
       {:ok, ssl_endpoint} ->
-        dnsimple_connect_results = connect_dnsimple(connection.account, domain.name, ssl_endpoint.cname)
+        app_hostname = case ssl_endpoint.cname do
+          nil -> "#{domain.name}.herokudns.com"
+          cname -> cname
+        end
+
+        dnsimple_connect_results = connect_dnsimple(connection.account, domain.name, app_hostname)
         heroku_connect_results = connect_heroku(connection.account, domain.name, app.id)
         Connection.save_connection_data(connection, dnsimple_connect_results, heroku_connect_results, ssl_endpoint.id)
 
@@ -64,39 +69,66 @@ defmodule HerokuConnector.ConnectionService do
     end
   end
 
-  def enable_heroku_ssl_endpoint(account, domain_name, app_id, dnsimple_certificate_id, ssl_endpoint_id) do
-    # Turn on the SSL add-on if necessary
-    # Currently this implementation relies on the SSL add-on.
-    # Eventually replace it with Heroku SSL (https://devcenter.heroku.com/articles/ssl-beta)
-    case HerokuConnector.Heroku.addon_enabled?(account, app_id, "ssl:endpoint") do
-      false ->
-        HerokuConnector.Heroku.create_addon(account, app_id, _addon_id = "ssl:endpoint")
-      _ ->
-        :ok # Do nothing
-    end
+  def sni_enabled? do
+    true
+  end
 
-    # Install or update the SSL endpoint
-    case ssl_endpoint_id do
-      nil -> install_heroku_ssl_endpoint(account, domain_name, app_id, dnsimple_certificate_id)
-      _ -> update_heroku_ssl_endpoint(account, domain_name, app_id, dnsimple_certificate_id, ssl_endpoint_id)
+  def enable_heroku_ssl_endpoint(account, domain_name, app_id, dnsimple_certificate_id, ssl_endpoint_id) do
+    case sni_enabled? do
+      true ->
+        # Install or update the SNI endpoint
+        case ssl_endpoint_id do
+          nil -> install_heroku_sni_endpoint(account, domain_name, app_id, dnsimple_certificate_id)
+          _ -> update_heroku_sni_endpoint(account, domain_name, app_id, dnsimple_certificate_id, ssl_endpoint_id)
+        end
+      false ->
+        case HerokuConnector.Heroku.addon_enabled?(account, app_id, "ssl:endpoint") do
+          false ->
+            HerokuConnector.Heroku.create_addon(account, app_id, _addon_id = "ssl:endpoint")
+          _ ->
+            :ok # Do nothing
+        end
+
+        # Install or update the SSL endpoint
+        case ssl_endpoint_id do
+          nil -> install_heroku_ssl_endpoint(account, domain_name, app_id, dnsimple_certificate_id)
+          _ -> update_heroku_ssl_endpoint(account, domain_name, app_id, dnsimple_certificate_id, ssl_endpoint_id)
+        end
     end
+  end
+
+  def install_heroku_sni_endpoint(account, domain_name, app_id, dnsimple_certificate_id) do
+    # Create the endpoint
+    {private_key, certificate_bundle} = certificate_parts(account, domain_name, dnsimple_certificate_id)
+    endpoint = HerokuConnector.Heroku.create_sni_endpoint(account, app_id, certificate_bundle, private_key)
+
+    # Return the endpoint
+    {:ok, endpoint}
+  end
+
+  def update_heroku_sni_endpoint(account, domain_name, app_id, dnsimple_certificate_id, ssl_endpoint_id) do
+    # Update the endpoint
+    {private_key, certificate_bundle} = certificate_parts(account, domain_name, dnsimple_certificate_id)
+    endpoint = HerokuConnector.Heroku.update_sni_endpoint(account, app_id, certificate_bundle, private_key, ssl_endpoint_id)
+
+    {:ok, endpoint}
   end
 
   def install_heroku_ssl_endpoint(account, domain_name, app_id, dnsimple_certificate_id) do
-    # Create the SSL endpoint
+    # Create the endpoint
     {private_key, certificate_bundle} = certificate_parts(account, domain_name, dnsimple_certificate_id)
-    ssl_endpoint = HerokuConnector.Heroku.create_ssl_endpoint(account, app_id, certificate_bundle, private_key)
+    endpoint = HerokuConnector.Heroku.create_ssl_endpoint(account, app_id, certificate_bundle, private_key)
 
-    # Return the SSL endpoint
-    {:ok, ssl_endpoint}
+    # Return the endpoint
+    {:ok, endpoint}
   end
 
   def update_heroku_ssl_endpoint(account, domain_name, app_id, dnsimple_certificate_id, ssl_endpoint_id) do
-    # Update the SSL endpoint
+    # Update the endpoint
     {private_key, certificate_bundle} = certificate_parts(account, domain_name, dnsimple_certificate_id)
-    ssl_endpoint = HerokuConnector.Heroku.update_ssl_endpoint(account, app_id, certificate_bundle, private_key, ssl_endpoint_id)
+    endpoint = HerokuConnector.Heroku.update_ssl_endpoint(account, app_id, certificate_bundle, private_key, ssl_endpoint_id)
 
-    {:ok, ssl_endpoint}
+    {:ok, endpoint}
   end
 
   defp certificate_parts(account, domain_name, dnsimple_certificate_id) do
@@ -127,7 +159,9 @@ defmodule HerokuConnector.ConnectionService do
     HerokuConnector.Dnsimple.create_records(account, domain_name, dnsimple_records(app_hostname))
     |> Enum.map(fn(result) ->
       case result do
-        {:ok, response} -> {:ok, response.data.id}
+        {:ok, response} ->
+          #Logger.debug("Connected record: #{inspect response}")
+          {:ok, response.data.id}
         {:error, error} ->
           # Failed to create records, re-apply removed services
           Enum.each(unapplied_services, &(HerokuConnector.Dnsimple.apply_service(account, domain_name, &1)))
@@ -142,7 +176,8 @@ defmodule HerokuConnector.ConnectionService do
 
   defp connect_heroku(account, domain_name, app_id) do
     # Create the appropriate custom domains in Heroku
-    HerokuConnector.Heroku.create_domains(account, app_id, heroku_hostnames(domain_name))
+    hostnames = heroku_hostnames(domain_name)
+    HerokuConnector.Heroku.create_domains(account, app_id, hostnames)
     |> Enum.map(fn(res) ->
       case res do
         %Happi.Heroku.Domain{id: id} -> {:ok, id}
@@ -177,7 +212,10 @@ defmodule HerokuConnector.ConnectionService do
       true ->
         # something has changed so it's time to reconnect
         if connection.connection_data.ssl_endpoint_id != nil do
-          disable_heroku_ssl_endpoint!(connection.account, app.id, connection.connection_data.ssl_endpoint_id)
+          case HerokuConnector.Heroku.addon_enabled?(connection.account, app.id, "ssl:endpoint") do
+            true -> disable_heroku_ssl_endpoint!(connection.account, app.id, connection.connection_data.ssl_endpoint_id)
+            false -> disable_heroku_sni_endpoint!(connection.account, app.id, connection.connection_data.ssl_endpoint_id)
+          end
         end
 
         case Map.get(connection_params, "dnsimple_certificate_id") do
@@ -228,7 +266,10 @@ defmodule HerokuConnector.ConnectionService do
 
     if connection.connection_data != nil do
       if connection.connection_data.ssl_endpoint_id != nil do
-        disable_heroku_ssl_endpoint!(connection.account, app.id, connection.connection_data.ssl_endpoint_id)
+        case HerokuConnector.Heroku.addon_enabled?(connection.account, app.id, "ssl:endpoint") do
+          true -> disable_heroku_ssl_endpoint!(connection.account, app.id, connection.connection_data.ssl_endpoint_id)
+          false -> disable_heroku_sni_endpoint!(connection.account, app.id, connection.connection_data.ssl_endpoint_id)
+        end
       end
       disconnect_dnsimple!(connection.account, domain.name, connection.connection_data.dnsimple_record_ids)
       disconnect_heroku!(connection.account, app.id, connection.connection_data.heroku_domain_ids)
@@ -247,16 +288,17 @@ defmodule HerokuConnector.ConnectionService do
     HerokuConnector.Heroku.delete_domains(account, app_id, heroku_domain_ids)
   end
 
-  defp disable_heroku_ssl_endpoint!(account, app_id, ssl_endpoint_id) do
-    # Currently this implementation relies on the SSL add-on.
-    # Eventually replace it with Heroku SSL (https://devcenter.heroku.com/articles/ssl-beta)
+  defp disable_heroku_sni_endpoint!(account, app_id, ssl_endpoint_id) do
+    # Remove the SNI endpoint
+    HerokuConnector.Heroku.delete_sni_endpoint(account, app_id, ssl_endpoint_id)
+    :ok
+  end
 
+  defp disable_heroku_ssl_endpoint!(account, app_id, ssl_endpoint_id) do
     # Remove the SSL endpoint
     HerokuConnector.Heroku.delete_ssl_endpoint(account, app_id, ssl_endpoint_id)
-
     # Disable the SSL add-on
     HerokuConnector.Heroku.delete_addon(account, app_id, _addon_id = "ssl:endpoint")
-
     :ok
   end
 end

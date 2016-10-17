@@ -21,8 +21,8 @@ defmodule HerokuConnector.Dnsimple do
     domains_service.all_domains(client(account), account.id)
   end
 
-  def domain(account, id) do
-    case domains_service.get_domain(client(account), account.id, id) do
+  def domain(account, domain_id) do
+    case domains_service.get_domain(client(account), account.dnsimple_account_id, domain_id) do
       {:ok, response} -> response.data
       {:error, error} ->
         IO.inspect(error)
@@ -33,7 +33,7 @@ defmodule HerokuConnector.Dnsimple do
   # Domain Certificates
 
   def certificates(account, domain_name) do
-    case certificates_service.list_certificates(client(account), account.id, domain_name) do
+    case certificates_service.list_certificates(client(account), account.dnsimple_account_id, domain_name) do
       {:ok, response} -> response.data
       {:error, error} ->
         IO.inspect(error)
@@ -46,7 +46,7 @@ defmodule HerokuConnector.Dnsimple do
   end
 
   def download_certificate(account, domain_name, certificate_id) do
-    case certificates_service.download_certificate(client(account), account.id, domain_name, certificate_id) do
+    case certificates_service.download_certificate(client(account), account.dnsimple_account_id, domain_name, certificate_id) do
       {:ok, response} -> response.data
       {:error, error} ->
         IO.inspect(error)
@@ -55,7 +55,7 @@ defmodule HerokuConnector.Dnsimple do
   end
 
   def private_key(account, domain_name, certificate_id) do
-    case certificates_service.private_key(client(account), account.id, domain_name, certificate_id) do
+    case certificates_service.get_certificate_private_key(client(account), account.dnsimple_account_id, domain_name, certificate_id) do
       {:ok, response} -> response.data
       {:error, error} ->
         IO.inspect(error)
@@ -66,7 +66,7 @@ defmodule HerokuConnector.Dnsimple do
   # Domain Services
 
   def applied_services(account, domain_name) do
-    case services_service.applied_services(client(account), account.id, domain_name) do
+    case services_service.applied_services(client(account), account.dnsimple_account_id, domain_name) do
       {:ok, response} -> response.data
       {:error, error} ->
         IO.inspect(error)
@@ -75,7 +75,7 @@ defmodule HerokuConnector.Dnsimple do
   end
 
   def apply_service(account, domain_name, service_id) do
-    case services_service.apply_service(client(account), account.id, domain_name, service_id) do
+    case services_service.apply_service(client(account), account.dnsimple_account_id, domain_name, service_id) do
       {:ok, _response} -> service_id
       {:error, error} ->
         IO.inspect(error)
@@ -84,7 +84,7 @@ defmodule HerokuConnector.Dnsimple do
   end
 
   def unapply_service(account, domain_name, service_id) do
-    case services_service.unapply_service(client(account), account.id, domain_name, service_id) do
+    case services_service.unapply_service(client(account), account.dnsimple_account_id, domain_name, service_id) do
       {:ok, _response} -> service_id
       {:error, error} ->
         IO.inspect(error)
@@ -97,19 +97,26 @@ defmodule HerokuConnector.Dnsimple do
   def create_records(account, zone_name, records) do
     c = client(account)
     zs = zones_service
-    Enum.map(records, &(zs.create_zone_record(c, account.id, zone_name, &1)))
+
+    Enum.map(records, fn(record) ->
+      zs.create_zone_record(c, account.id, zone_name, record_to_map(record))
+    end)
   end
 
   def delete_records(account, zone_name, record_ids) do
     c = client(account)
     zs = zones_service
-    Enum.map(record_ids, &(zs.delete_zone_record(c, account.id, zone_name, &1)))
+    Enum.map(record_ids, &(zs.delete_zone_record(c, account.dnsimple_account_id, zone_name, &1)))
+  end
+
+  defp record_to_map(record) do
+    %{name: record.name, type: record.type, content: record.content, ttl: record.ttl, priority: record.priority}
   end
 
   # Webhooks
 
   def create_webhook(account, webhook_url) do
-    case webhooks_service.create_webhook(client(account), account.id, %{url: webhook_url}) do
+    case webhooks_service.create_webhook(client(account), account.dnsimple_account_id, %{url: webhook_url}) do
       {:ok, response} -> response.data
       {:error, error} ->
         IO.inspect(error)
@@ -118,11 +125,11 @@ defmodule HerokuConnector.Dnsimple do
   end
 
   def delete_webhook(account, webhook_id) do
-    webhooks_service.delete_webhook(client(account), account.id, webhook_id)
+    webhooks_service.delete_webhook(client(account), account.dnsimple_account_id, webhook_id)
   end
 
   def delete_webhook!(account, webhook_id) do
-    case webhooks_service.delete_webhook(client(account), account.id, webhook_id) do
+    case webhooks_service.delete_webhook(client(account), account.dnsimple_account_id, webhook_id) do
       {:ok, response} -> response.data
       {:error, error} ->
         IO.inspect(error)
