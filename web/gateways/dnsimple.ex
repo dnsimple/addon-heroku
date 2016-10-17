@@ -97,13 +97,13 @@ defmodule HerokuConnector.Dnsimple do
   def create_records(account, zone_name, records) do
     c = client(account)
     zs = zones_service
-    Enum.map(records, &(zs.create_record(c, account.id, zone_name, &1)))
+    Enum.map(records, &(zs.create_zone_record(c, account.id, zone_name, &1)))
   end
 
   def delete_records(account, zone_name, record_ids) do
     c = client(account)
     zs = zones_service
-    Enum.map(record_ids, &(zs.delete_record(c, account.id, zone_name, &1)))
+    Enum.map(record_ids, &(zs.delete_zone_record(c, account.id, zone_name, &1)))
   end
 
   # Webhooks
