@@ -63,11 +63,11 @@ defmodule HerokuConnector.Dnsimple.WebhooksMock do
 end
 
 defmodule HerokuConnector.Dnsimple.ZonesMock do
-  def create_record(_client, _account_id, _zone_name, attributes) do
+  def create_zone_record(_client, _account_id, _zone_name, attributes) do
     {:ok, %Dnsimple.Response{data: attributes}}
   end
 
-  def delete_record(_client, _account_id, _zone_name, id) do
+  def delete_zone_record(_client, _account_id, _zone_name, id) do
     id
   end
 end
