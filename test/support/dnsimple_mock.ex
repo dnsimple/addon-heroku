@@ -29,8 +29,8 @@ defmodule HerokuConnector.Dnsimple.DomainCertificatesMock do
     {:ok, %Dnsimple.Response{data: []}}
   end
 
-  def active_certificates(_client, _account_id, _name) do
-    {:ok, %Dnsimple.Response{data: []}}
+  def get_certificate(_client, _account_id, _name, certificate_id) do
+    {:ok, %Dnsimple.Response{data: %Dnsimple.Certificate{id: certificate_id}}}
   end
 
   def download_certificate(_client, _account_id, _name, _certificate_id) do

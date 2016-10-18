@@ -19,6 +19,12 @@ defmodule HerokuConnector.Heroku do
     app_service.get(client(account), app_id)
   end
 
+  # Dynos
+
+  def dynos(account, app_id) do
+    dyno_service.list(client(account, app_id))
+  end
+
   # Add-on attachments
 
   def create_addon(account, app_id, addon_id) do
@@ -99,6 +105,10 @@ defmodule HerokuConnector.Heroku do
 
   defp domain_service do
     Application.get_env(:heroku_connector, :heroku_domains_service, Happi.Heroku.Domain)
+  end
+
+  defp dyno_service do
+    Application.get_env(:heroku_connector, :heroku_dyno_service, Happi.Heroku.Dyno)
   end
 
   defp addon_service do

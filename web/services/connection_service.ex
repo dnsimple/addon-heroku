@@ -43,7 +43,7 @@ defmodule HerokuConnector.ConnectionService do
   end
 
   defp connect_with_certificate(connection, domain, app, dnsimple_certificate_id) do
-    case enable_heroku_ssl_endpoint(connection.account, connection.dnsimple_domain_id, app.id, dnsimple_certificate_id, nil) do
+    case enable_heroku_ssl_endpoint(connection.account, connection.dnsimple_domain_id, app, dnsimple_certificate_id, nil) do
       {:ok, ssl_endpoint} ->
         app_hostname = case ssl_endpoint.cname do
           nil -> "#{domain.name}.herokudns.com"
@@ -69,30 +69,35 @@ defmodule HerokuConnector.ConnectionService do
     end
   end
 
-  def sni_enabled? do
+  defp sni_enabled?(_account, _app) do
+    # SNI is always enabled right now. This includes free dynos. If a user attempts
+    # to activate SNI on a free dyno and error occurs.
+    #
+    #dynos = HerokuConnector.Heroku.dynos(account, app.id)
+    #Logger.warn("dynos: #{inspect dynos}")
     true
   end
 
-  def enable_heroku_ssl_endpoint(account, domain_name, app_id, dnsimple_certificate_id, ssl_endpoint_id) do
-    case sni_enabled? do
+  def enable_heroku_ssl_endpoint(account, domain_name, app, dnsimple_certificate_id, ssl_endpoint_id) do
+    case sni_enabled?(account, app) do
       true ->
         # Install or update the SNI endpoint
         case ssl_endpoint_id do
-          nil -> install_heroku_sni_endpoint(account, domain_name, app_id, dnsimple_certificate_id)
-          _ -> update_heroku_sni_endpoint(account, domain_name, app_id, dnsimple_certificate_id, ssl_endpoint_id)
+          nil -> install_heroku_sni_endpoint(account, domain_name, app.id, dnsimple_certificate_id)
+          _ -> update_heroku_sni_endpoint(account, domain_name, app.id, dnsimple_certificate_id, ssl_endpoint_id)
         end
       false ->
-        case HerokuConnector.Heroku.addon_enabled?(account, app_id, "ssl:endpoint") do
+        case HerokuConnector.Heroku.addon_enabled?(account, app.id, "ssl:endpoint") do
           false ->
-            HerokuConnector.Heroku.create_addon(account, app_id, _addon_id = "ssl:endpoint")
+            HerokuConnector.Heroku.create_addon(account, app.id, _addon_id = "ssl:endpoint")
           _ ->
             :ok # Do nothing
         end
 
         # Install or update the SSL endpoint
         case ssl_endpoint_id do
-          nil -> install_heroku_ssl_endpoint(account, domain_name, app_id, dnsimple_certificate_id)
-          _ -> update_heroku_ssl_endpoint(account, domain_name, app_id, dnsimple_certificate_id, ssl_endpoint_id)
+          nil -> install_heroku_ssl_endpoint(account, domain_name, app.id, dnsimple_certificate_id)
+          _ -> update_heroku_ssl_endpoint(account, domain_name, app.id, dnsimple_certificate_id, ssl_endpoint_id)
         end
     end
   end
@@ -160,7 +165,6 @@ defmodule HerokuConnector.ConnectionService do
     |> Enum.map(fn(result) ->
       case result do
         {:ok, response} ->
-          #Logger.debug("Connected record: #{inspect response}")
           {:ok, response.data.id}
         {:error, error} ->
           # Failed to create records, re-apply removed services
@@ -170,7 +174,7 @@ defmodule HerokuConnector.ConnectionService do
     end)
   end
 
-  defp heroku_hostnames(domain_name) do
+  def heroku_hostnames(domain_name) do
      [domain_name, "www.#{domain_name}"]
   end
 
@@ -227,7 +231,7 @@ defmodule HerokuConnector.ConnectionService do
             {:ok, dnsimple_connect_results ++ heroku_connect_results}
           dnsimple_certificate_id ->
             # certificate id is present
-            case enable_heroku_ssl_endpoint(connection.account, new_domain.id, new_app.id, dnsimple_certificate_id, connection.ssl_endpoint_id) do
+            case enable_heroku_ssl_endpoint(connection.account, new_domain.id, new_app, dnsimple_certificate_id, connection.ssl_endpoint_id) do
               {:ok, ssl_endpoint} ->
                 dnsimple_connect_results = reconnect_dnsimple(connection, domain, app, new_domain, new_app, ssl_endpoint.cname)
                 heroku_connect_results = reconnect_heroku(connection, domain, app, new_domain, new_app)

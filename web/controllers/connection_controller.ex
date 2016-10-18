@@ -60,7 +60,9 @@ defmodule HerokuConnector.ConnectionController do
   def connect(conn, %{"id" => id}) do
     account = conn.assigns[:current_account]
     connection = Connection.get!(account, id)
-    case HerokuConnector.Dnsimple.active_certificates(account, connection.dnsimple_domain_id) do
+    domain = HerokuConnector.Dnsimple.domain(account, connection.dnsimple_domain_id)
+    hostnames = HerokuConnector.ConnectionService.heroku_hostnames(domain.name)
+    case HerokuConnector.Dnsimple.active_certificates_matching_hosts(account, domain.id, hostnames) do
       [] ->
         connect(conn, %{"id" => connection.id, "connection" => %{"id" => 0}})
       certificates ->

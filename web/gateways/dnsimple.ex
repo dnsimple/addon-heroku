@@ -41,8 +41,21 @@ defmodule HerokuConnector.Dnsimple do
     end
   end
 
+  def certificate(account, domain_name, certificate_id) do
+    case certificates_service.get_certificate(client(account), account.dnsimple_account_id, domain_name, certificate_id) do
+      {:ok, response} -> response.data
+      {:error, error} ->
+        IO.inspect(error)
+        raise "Failed to get certificate: #{inspect error}"
+    end
+  end
+
   def active_certificates(account, domain_name) do
     Enum.filter(certificates(account, domain_name), fn(c) -> c.state == "issued" end)
+  end
+
+  def active_certificates_matching_hosts(account, domain_name, host_names) do
+    Enum.filter(active_certificates(account, domain_name), fn(c) -> Enum.any?(host_names, &(c.common_name == &1)) end)
   end
 
   def download_certificate(account, domain_name, certificate_id) do

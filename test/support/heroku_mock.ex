@@ -8,6 +8,12 @@ defmodule HerokuConnector.Heroku.AppsServiceMock do
   end
 end
 
+defmodule HerokuConnector.Heroku.DynoServiceMock do
+  def list(_client) do
+    []
+  end
+end
+
 defmodule HerokuConnector.Heroku.DomainsServiceMock do
   def create(_client, _map) do
     %Happi.Heroku.Domain{id: "1"}
