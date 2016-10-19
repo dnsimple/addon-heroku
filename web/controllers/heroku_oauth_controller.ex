@@ -12,9 +12,9 @@ defmodule HerokuConnector.HerokuOauthController do
   end
 
   def create(conn, %{"code" => code}) do
-    case OAuth2.Client.get_token(client, code: code, state: @state) do
+    case OAuth2.Client.get_token(client, client_secret: client.client_secret, code: code, state: @state) do
       {:ok, response} ->
-        access_token = response.access_token
+        access_token = response.token.access_token
         client = Happi.api_client(api_key: access_token)
         heroku_account = Happi.get(client, Happi.Heroku.Account, nil)
         account = Account.get!(get_session(conn, :account_id))
@@ -23,7 +23,7 @@ defmodule HerokuConnector.HerokuOauthController do
 
         # Is there a better way to handle calculating when the access
         # token expires?
-        expires_at = response.expires_at
+        expires_at = response.token.expires_at
         |> Kernel.+(:calendar.datetime_to_gregorian_seconds(epoch))
         |> :calendar.gregorian_seconds_to_datetime
         |> Ecto.DateTime.from_erl
@@ -33,7 +33,7 @@ defmodule HerokuConnector.HerokuOauthController do
           "heroku_account_id" => heroku_account.id,
           "heroku_access_token" => access_token,
           "heroku_access_token_expires_at" => expires_at,
-          "heroku_refresh_token" => response.refresh_token
+          "heroku_refresh_token" => response.token.refresh_token
         })
         Account.update!(changeset)
 
@@ -45,7 +45,7 @@ defmodule HerokuConnector.HerokuOauthController do
   end
 
   defp client do
-    HerokuConnector.Heroku.oauth_client
+    IO.inspect HerokuConnector.Heroku.oauth_client
   end
 
 end
