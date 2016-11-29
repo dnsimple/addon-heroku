@@ -18,7 +18,7 @@ defmodule HerokuConnector.Dnsimple do
   # Domains
 
   def domains(account) do
-    domains_service.all_domains(client(account), account.id)
+    domains_service.all_domains(client(account), account.dnsimple_account_id)
   end
 
   def domain(account, domain_id) do
