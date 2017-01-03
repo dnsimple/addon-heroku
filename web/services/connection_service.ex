@@ -71,7 +71,7 @@ defmodule HerokuConnector.ConnectionService do
 
   defp sni_enabled?(_account, _app) do
     # SNI is always enabled right now. This includes free dynos. If a user attempts
-    # to activate SNI on a free dyno and error occurs.
+    # to activate SNI on a free dyno an error occurs.
     #
     #dynos = HerokuConnector.Heroku.dynos(account, app.id)
     #Logger.warn("dynos: #{inspect dynos}")
