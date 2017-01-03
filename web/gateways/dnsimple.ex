@@ -112,7 +112,7 @@ defmodule HerokuConnector.Dnsimple do
     zs = zones_service
 
     Enum.map(records, fn(record) ->
-      zs.create_zone_record(c, account.id, zone_name, record_to_map(record))
+      zs.create_zone_record(c, account.dnsimple_account_id, zone_name, record_to_map(record))
     end)
   end
 
