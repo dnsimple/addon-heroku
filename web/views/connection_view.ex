@@ -1,11 +1,14 @@
 defmodule HerokuConnector.ConnectionView do
   use HerokuConnector.Web, :view
 
-  def domain_select_options(dnsimple_domains), do: Enum.map(dnsimple_domains, &({&1.name, &1.name}))
-
-  def certificate_select_options(dnsimple_domain, dnsimple_certificates) do
-    [{"No certificate", 0}] ++ Enum.map(dnsimple_certificates, &({"#{&1.name}.#{dnsimple_domain.name} (Expires: #{&1.expires_on})", &1.id}))
+  def certificate_display(dnsimple_domain, dnsimple_certificate) do
+    full_certificate_name(dnsimple_domain, dnsimple_certificate) <> " (Expires: #{dnsimple_certificate.expires_on})"
   end
 
-  def app_select_options(heroku_apps), do: Enum.map(heroku_apps, &({&1.name, &1.id}))
+  def full_certificate_name(dnsimple_domain, dnsimple_certificate) do
+    case dnsimple_certificate.name do
+      "" -> dnsimple_domain.name
+      name -> "#{name}.#{dnsimple_domain.name}"
+    end
+  end
 end

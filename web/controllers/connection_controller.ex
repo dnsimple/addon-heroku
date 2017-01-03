@@ -141,7 +141,7 @@ defmodule HerokuConnector.ConnectionController do
                   {:ok, new_connection} ->
                     conn
                     |> put_flash(:info, "Connection updated successfully.")
-                    |> redirect(to: connection_path(conn, :show, new_connection))
+                    |> redirect(to: connection_path(conn, :index))
                   {:error, changeset} ->
                     render(conn, "reconnect.html", changeset: changeset, connection: connection, dnsimple_domain: new_domain, dnsimple_certificates: certificates)
                 end

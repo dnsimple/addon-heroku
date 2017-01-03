@@ -8,29 +8,38 @@
     <meta name="author" content="">
 
     <title>DNSimple / Heroku Connector</title>
+    <link rel="stylesheet" href="https://make-it-nice.dnsimple.com/css/dnsimple-tachyons-1.0.0.min.css">
     <link rel="stylesheet" href="<%= static_path(@conn, "/css/app.css") %>">
   </head>
 
-  <body>
+  <body class="dn-body">
+    <div class="dn-navbar pa3 mb4">
+      <div class="dn-navbar-branding">
+        Heroku Connector
+      </div>
+
+    <%= if HerokuConnector.Plug.CurrentAccount.account_connected?(@conn) do %>
+      <div class="dn-navbar-nav">
+        <%= link "Connections", to: connection_path(@conn, :index), class: "dn-link-primary mh2" %>
+        <%= link "Logout", to: account_path(@conn, :delete), method: :delete, class: "dn-link-primary mh2", form: [class: "dib"] %>
+      </div>
+    <% end %>
+    </div>
+
     <div class="container">
-      <header class="header">
-        <%= if HerokuConnector.Plug.CurrentAccount.account_connected?(@conn) do %>
-          <nav role="navigation">
-            <ul class="nav nav-pills pull-right">
-              <li><%= link "Disconnect", to: account_path(@conn, :delete), method: :delete %></li>
-            </ul>
-          </nav>
-        <% end %>
-      </header>
 
-      <p class="alert alert-info" role="alert"><%= get_flash(@conn, :info) %></p>
-      <p class="alert alert-danger" role="alert"><%= get_flash(@conn, :error) %></p>
+      <%= if get_flash(@conn, :info) do %>
+      <div class="dn-alert-info" role="alert"><%= get_flash(@conn, :info) %></div>
+      <% end %>
+      <%= if get_flash(@conn, :error) do %>
+      <div class="dn-alert-danger" role="alert"><%= get_flash(@conn, :error) %></div>
+      <% end %>
 
-      <main role="main">
+      <div class="mw7 mb4 center">
         <%= render @view_module, @view_template, assigns %>
-      </main>
+      </div>
+    </div>
 
-    </div> <!-- /container -->
     <script src="<%= static_path(@conn, "/js/app.js") %>"></script>
   </body>
 </html>

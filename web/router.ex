@@ -22,9 +22,11 @@ defmodule HerokuConnector.Router do
 
     get "/dnsimple/authorize", DnsimpleOauthController, :new
     get "/dnsimple/callback",  DnsimpleOauthController, :create
+    get "/dnsimple/domains", DnsimpleDomainController, :index
 
     get "/heroku/authorize", HerokuOauthController, :new
     get "/heroku/callback", HerokuOauthController, :create
+    get "/heroku/applications", HerokuApplicationController, :index
 
     resources "/connections", ConnectionController
     get "/connections/:id/connect", ConnectionController, :connect

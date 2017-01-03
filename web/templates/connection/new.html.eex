@@ -1,8 +1,6 @@
 <h2>New connection</h2>
 
 <%= render "form.html", changeset: @changeset,
-                        dnsimple_domains: @dnsimple_domains,
-                        heroku_apps: @heroku_apps,
-                        action: connection_path(@conn, :create) %>
-
-<%= link "Back", to: connection_path(@conn, :index) %>
+dnsimple_domains: @dnsimple_domains,
+heroku_apps: @heroku_apps,
+action: connection_path(@conn, :create) %>

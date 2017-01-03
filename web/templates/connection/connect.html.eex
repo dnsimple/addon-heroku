@@ -2,18 +2,19 @@
 
 <%= form_for @changeset, connection_path(@conn, :connect, @connection), fn f -> %>
   <%= if @changeset.action do %>
-    <div class="alert alert-danger">
+    <div class="dn-alert-danger">
       <p>Oops, something went wrong! Please check the errors below.</p>
     </div>
   <% end %>
 
-  <div class="form-group">
-    <%= label f, :dnsimple_certificate_id, class: "control-label" %>
-    <%= select f, :dnsimple_certificate_id, certificate_select_options(@dnsimple_domain, @dnsimple_certificates), class: "form-control" %>
-    <%= error_tag f, :dnsimple_certificate_id %>
+  <%= for dnsimple_certificate <- @dnsimple_certificates do %>
+  <div class="pv2">
+    <input type="radio" name="connection[dnsimple_certificate_id]" id="connection_dnsimple_certificate_id_<%= dnsimple_certificate.id %>" value="<%= dnsimple_certificate.id %>"/>
+    <label for="<%= dnsimple_certificate.id %>" class="pl1 pointer"><%= certificate_display(@dnsimple_domain, dnsimple_certificate) %></label>
   </div>
+  <% end %>
 
   <div class="form-group">
-    <%= submit "Connect", class: "btn btn-primary" %>
+    <%= submit "Connect", class: "dn-btn-primary" %>
   </div>
 <% end %>

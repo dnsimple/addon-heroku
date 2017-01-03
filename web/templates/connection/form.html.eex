@@ -1,23 +1,48 @@
 <%= form_for @changeset, @action, fn f -> %>
   <%= if @changeset.action do %>
-    <div class="alert alert-danger">
+    <div class="dn-alert-danger">
       <p>Oops, something went wrong! Please check the errors below.</p>
     </div>
   <% end %>
 
-  <div class="form-group">
-    <%= label f, :dnsimple_domain_id, class: "control-label" %>
-    <%= select f, :dnsimple_domain_id, domain_select_options(@dnsimple_domains), class: "form-control" %>
-    <%= error_tag f, :dnsimple_domain_id %>
+  <div class="dn-card">
+    <img class="dn-connector-icon" src="https://addon-ui.dnsimple.com/images/dnsimple-icon.svg" alt="">
+    <h3 class="dn-connector-name">Domains</h3>
+
+    <%= if Enum.count(@dnsimple_domains) > 10 do %>
+    <p class="gray">Showing 10 out of <%= Enum.count(@dnsimple_domains) %> domains. Use the search if your domain does not appear below.</p>
+    <input id="js-dnsimple-domain-input" name="connection[dnsimple_domain_id]" class="db w-100 input-reset pa2 mb3 ba b--light-silver br1" placeholder="Search your domains" data-list="#domain-list" />
+  <% else %>
+    <p class="gray">Showing <%= Enum.count(@dnsimple_domains) %> domains</p>
+    <% end %>
+
+    <%= for dnsimple_domain <- Enum.take(@dnsimple_domains, 10) do %>
+    <div class="pv2">
+      <input type="radio" name="connection[dnsimple_domain_id]" id="connection_dnsimple_domain_id_<%= dnsimple_domain.id %>" value="<%= dnsimple_domain.name %>"/>
+      <label for="<%= dnsimple_domain.id %>" class="pl1 pointer"><%= dnsimple_domain.name %></label>
+    </div>
+    <% end %>
   </div>
 
-  <div class="form-group">
-    <%= label f, :heroku_app_id, class: "control-label" %>
-    <%= select f, :heroku_app_id, app_select_options(@heroku_apps), class: "form-control" %>
-    <%= error_tag f, :heroku_app_id %>
+  <div class="dn-card">
+    <img class="dn-connector-icon" src="/images/heroku-plain.svg" alt="">
+    <h3 class="dn-connector-name">Applications</h3>
+
+    <%= if Enum.count(@heroku_apps) > 10 do %>
+    <p class="gray">Showing 10 out of <%= Enum.count(@heroku_apps) %> applications. Use the search if your application does not appear below.</p>
+    <input id="js-heroku-application-input" name="connection[heroku_app_id]" class="db w-100 input-reset pa2 mb3 ba b--light-silver br1" placeholder="Search your applications" data-list="#application-list" />
+  <% else %>
+    <p class="gray">Showing <%= Enum.count(@heroku_apps) %> applications</p>
+    <% end %>
+
+
+    <%= for heroku_app <- Enum.take(@heroku_apps, 10) do %>
+    <div class="pv2">
+      <input type="radio" name="connection[heroku_app_id]" id="connection_heroku_app_id_<%= heroku_app.id %>" value="<%= heroku_app.name %>"/>
+      <label for="<%= heroku_app.id %>" class="pl1 pointer"><%= heroku_app.name %></label>
+    </div>
+    <% end %>
   </div>
 
-  <div class="form-group">
-    <%= submit "Connect", class: "btn btn-primary" %>
-  </div>
+  <%= submit "Connect", class: "dn-btn-primary" %>
 <% end %>
