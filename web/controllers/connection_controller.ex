@@ -32,6 +32,7 @@ defmodule HerokuConnector.ConnectionController do
       {:ok, connection} ->
         case HerokuConnector.Dnsimple.certificates(account, connection.dnsimple_domain_id) do
           [] ->
+            # TODO: convert to a redirect
             connect(conn, %{"id" => connection.id, "connection" => %{"id" => 0}})
           _ ->
             redirect(conn, to: connection_path(conn, :connect, connection))
@@ -64,6 +65,7 @@ defmodule HerokuConnector.ConnectionController do
     hostnames = HerokuConnector.ConnectionService.heroku_hostnames(domain.name)
     case HerokuConnector.Dnsimple.active_certificates_matching_hosts(account, domain.id, hostnames) do
       [] ->
+        # TODO: convert to a redirect
         connect(conn, %{"id" => connection.id, "connection" => %{"id" => 0}})
       certificates ->
         domain = HerokuConnector.Dnsimple.domain(account, connection.dnsimple_domain_id)
