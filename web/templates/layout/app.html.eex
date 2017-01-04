@@ -9,7 +9,6 @@
 
     <title>DNSimple / Heroku Connector</title>
     <link rel="stylesheet" href="https://make-it-nice.dnsimple.com/css/dnsimple-tachyons-1.0.0.min.css">
-    <link rel="stylesheet" href="<%= static_path(@conn, "/css/app.css") %>">
   </head>
 
   <body class="dn-body">
