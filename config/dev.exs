@@ -42,6 +42,7 @@ config :heroku_connector, HerokuConnector.Repo,
   pool_size: 10
 
 config :heroku_connector,
+  webhook_url: "https://dynsimple.io", # webhooks don't work on localhost
   dnsimple_client_id: "9e0621f55ad7aec6",
   dnsimple_client_secret: "oRnsTkiTK3J0t7lWuCb22gMpdhRdLLvX",
   heroku_client_id: "c0920219-7ef7-41f9-8645-d599db85b2a5",
