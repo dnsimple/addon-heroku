@@ -20,7 +20,6 @@
     <%= if HerokuConnector.Plug.CurrentAccount.account_connected?(@conn) do %>
       <div class="dn-navbar-nav">
         <%= link "Connections", to: connection_path(@conn, :index), class: "dn-link-primary mh2" %>
-        <%= link "Logout", to: account_path(@conn, :delete), method: :delete, class: "dn-link-primary mh2", form: [class: "dib"] %>
       </div>
     <% end %>
     </div>

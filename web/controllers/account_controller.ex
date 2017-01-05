@@ -5,6 +5,6 @@ defmodule HerokuConnector.AccountController do
 
   def delete(conn, _params) do
     HerokuConnector.Plug.CurrentAccount.disconnect(conn)
-    |> render("delete.html")
+    |> redirect(to: connection_path(conn, :index))
   end
 end

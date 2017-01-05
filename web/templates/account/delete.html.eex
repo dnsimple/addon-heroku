@@ -1,3 +1,0 @@
-<p>Account disconnected.</p>
-
-<p><%= link "Continue", to: page_path(@conn, :index) %></p>
