@@ -156,7 +156,7 @@ defmodule HerokuConnector.ConnectionService do
       [] -> []
       services ->
         services
-        |> Enum.filter(&(&1.short_name =~ ~r/heroku/))
+        |> Enum.filter(&(&1.sid =~ ~r/heroku/))
         |> Enum.map(&(HerokuConnector.Dnsimple.unapply_service(account, domain_name, &1.id)))
     end
 
