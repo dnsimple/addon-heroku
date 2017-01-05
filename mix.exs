@@ -37,8 +37,8 @@ defmodule HerokuConnector.Mixfile do
      {:phoenix_live_reload, "~> 1.0", only: :dev},
      {:gettext, "~> 0.9"},
      {:cowboy, "~> 1.0"},
-     {:dnsimple, git: "https://github.com/dnsimple/dnsimple-elixir.git"},
-     {:happi, git: "https://github.com/aeden/happi.git", tag: "0.0.5"},
+     {:dnsimple, "~> 1.0"},
+     {:happi, git: "https://github.com/aeden/happi.git", tag: "0.0.6"},
      {:oauth2, "~> 0.8"}]
   end
 
