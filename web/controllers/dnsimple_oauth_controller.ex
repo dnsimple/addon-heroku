@@ -30,8 +30,8 @@ defmodule HerokuConnector.DnsimpleOauthController do
         client = %Dnsimple.Client{access_token: access_token}
         case HerokuConnector.Dnsimple.whoami(client) do
           {:ok, %Dnsimple.Response{data: data}} ->
-            account = Account.find_or_create!(Integer.to_string(data.account["id"]), %{
-              "dnsimple_account_email" => data.account["email"],
+            account = Account.find_or_create!(Integer.to_string(data.account.id), %{
+              "dnsimple_account_email" => data.account.email,
               "dnsimple_access_token" => access_token
             })
 

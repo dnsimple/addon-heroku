@@ -18,7 +18,12 @@ defmodule HerokuConnector.Dnsimple do
   # Domains
 
   def domains(account) do
-    domains_service.all_domains(client(account), account.dnsimple_account_id)
+    case domains_service.all_domains(client(account), account.dnsimple_account_id) do
+      {:ok, domains} -> domains
+      {:error, error} ->
+        IO.inspect(error)
+        raise "Failed to retrieve domains: #{inspect error}"
+    end
   end
 
   def domain(account, domain_id) do
