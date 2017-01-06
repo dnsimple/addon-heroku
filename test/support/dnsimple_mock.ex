@@ -6,7 +6,7 @@ end
 
 defmodule HerokuConnector.Dnsimple.IdentityMock do
   def whoami(_client) do
-    {:ok, %Dnsimple.Response{data: %{account: %{"id" => 1}}}}
+    {:ok, %Dnsimple.Response{data: %{account: %Dnsimple.Account{id: 1}}}}
   end
 end
 
@@ -16,7 +16,7 @@ defmodule HerokuConnector.Dnsimple.DomainsMock do
   end
 
   def all_domains(_client, _opts) do
-    []
+    {:ok, []}
   end
 
   def get_domain(_client, _account_id, name) do
