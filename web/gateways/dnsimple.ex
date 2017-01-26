@@ -56,7 +56,9 @@ defmodule HerokuConnector.Dnsimple do
   end
 
   def active_certificates(account, domain_name) do
-    Enum.filter(certificates(account, domain_name), fn(c) -> c.state == "issued" end)
+    Enum.filter(certificates(account, domain_name), fn(c) -> 
+      c.state == "issued" and Date.compare(Date.from_iso8601!(c.expires_on), Date.utc_today()) == :gt
+    end)
   end
 
   def active_certificates_matching_hosts(account, domain_name, host_names) do
