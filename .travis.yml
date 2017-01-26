@@ -12,4 +12,4 @@ addons:
   postgresql: "9.5"
 
 before_script:
-  - psql -c 'create database heroku_connector_test;' -U postgres
+  - MIX_ENV=test mix ecto.create
