@@ -14,6 +14,11 @@
   </div>
   <% end %>
 
+  <div class="pv2">
+    <input type="radio" name="connection[dnsimple_certificate_id]" id="connection_dnsimple_certificate_id_0" value="0" />
+    <label for="connection_dnsimple_certificate_id_0" class="pl1 pointer">No Certificate</label>
+  </div>
+
   <div class="form-group">
     <%= submit "Connect", class: "dn-btn-primary" %>
   </div>
