@@ -32,7 +32,7 @@ defmodule HerokuConnector.Connection do
     field :configuration, :map
     embeds_one :connection_data, HerokuConnector.Connection.ConnectionData, on_replace: :delete
 
-    timestamps
+    timestamps()
   end
 
   @required_fields ~w(account_id dnsimple_domain_id heroku_app_id)
@@ -109,8 +109,8 @@ defmodule HerokuConnector.Connection do
     # endpoint returns a 201 with nil ids in the records that are returned. The second filter
     # in the chain below filters out those nil ids.
     connection_data = %ConnectionData{
-      dnsimple_record_ids: Enum.filter_map(dnsimple_connect_results, success_fn, extract_id_fn) |> Enum.filter(non_nil_fn),
-      heroku_domain_ids: Enum.filter_map(heroku_connect_results, success_fn, extract_id_fn),
+      dnsimple_record_ids: Enum.filter_map(dnsimple_connect_results, success_fn(), extract_id_fn()) |> Enum.filter(non_nil_fn()),
+      heroku_domain_ids: Enum.filter_map(heroku_connect_results, success_fn(), extract_id_fn()),
       ssl_endpoint_id: ssl_endpoint_id
     }
 

@@ -138,7 +138,7 @@ defmodule HerokuConnector.ConnectionController do
             case ConnectionService.reconnect(changeset, connection_params) do
               {:ok, _} ->
                 case Connection.update(changeset) do
-                  {:ok, new_connection} ->
+                  {:ok, _new_connection} ->
                     conn
                     |> put_flash(:info, "Connection updated successfully.")
                     |> redirect(to: connection_path(conn, :index))

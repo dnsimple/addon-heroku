@@ -13,7 +13,7 @@ defmodule HerokuConnector.Account do
     field :heroku_refresh_token, :string
     field :configuration, :map
 
-    timestamps
+    timestamps()
   end
 
   @required_fields ~w(dnsimple_account_id)

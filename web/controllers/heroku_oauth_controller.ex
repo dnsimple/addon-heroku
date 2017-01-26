@@ -7,16 +7,16 @@ defmodule HerokuConnector.HerokuOauthController do
 
   def new(conn, _params) do
     oauth_params = [state: @state]
-    oauth_url = OAuth2.Client.authorize_url!(client, oauth_params)
+    oauth_url = OAuth2.Client.authorize_url!(client(), oauth_params)
     redirect(conn, external: oauth_url)
   end
 
   def create(conn, %{"code" => code}) do
-    case OAuth2.Client.get_token(client, client_secret: client.client_secret, code: code, state: @state) do
+    case OAuth2.Client.get_token(client(), client_secret: client().client_secret, code: code, state: @state) do
       {:ok, response} ->
         access_token = response.token.access_token
-        client = Happi.api_client(api_key: access_token)
-        heroku_account = Happi.get(client, Happi.Heroku.Account, nil)
+        happi_client = Happi.api_client(api_key: access_token)
+        heroku_account = Happi.get(happi_client, Happi.Heroku.Account, nil)
         account = Account.get!(get_session(conn, :account_id))
 
         epoch = {{1970, 1, 1}, {0, 0, 0}}

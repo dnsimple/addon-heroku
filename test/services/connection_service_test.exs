@@ -6,7 +6,6 @@ defmodule Heroku.ConnectionServiceTest do
   alias HerokuConnector.Account
 
   @valid_attrs %{dnsimple_domain_id: "123", heroku_app_id: "ABC"}
-  @invalid_attrs %{}
 
   setup do
     {:ok, account} = Account.create(%Account{dnsimple_account_id: "1"})

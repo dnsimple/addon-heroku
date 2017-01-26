@@ -1,6 +1,6 @@
 <h2>Connection Options</h2>
 
-<%= form_for @changeset, connection_path(@conn, :connect, @connection), fn f -> %>
+<%= form_for @changeset, connection_path(@conn, :connect, @connection), fn _f -> %>
   <%= if @changeset.action do %>
     <div class="dn-alert-danger">
       <p>Oops, something went wrong! Please check the errors below.</p>

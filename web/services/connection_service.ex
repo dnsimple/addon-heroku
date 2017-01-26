@@ -31,7 +31,7 @@ defmodule HerokuConnector.ConnectionService do
     heroku_connect_results = connect_heroku(connection.account, domain.name, app.id)
     Connection.save_connection_data(connection, dnsimple_connect_results, heroku_connect_results)
 
-    case Enum.all?(dnsimple_connect_results ++ heroku_connect_results, success_fn) do
+    case Enum.all?(dnsimple_connect_results ++ heroku_connect_results, success_fn()) do
       true ->
         {:ok, connection}
       false ->
@@ -54,7 +54,7 @@ defmodule HerokuConnector.ConnectionService do
         heroku_connect_results = connect_heroku(connection.account, domain.name, app.id)
         Connection.save_connection_data(connection, dnsimple_connect_results, heroku_connect_results, ssl_endpoint.id)
 
-        case Enum.all?(dnsimple_connect_results ++ heroku_connect_results, success_fn) do
+        case Enum.all?(dnsimple_connect_results ++ heroku_connect_results, success_fn()) do
           true ->
             {:ok, connection}
           false ->

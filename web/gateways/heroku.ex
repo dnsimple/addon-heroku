@@ -9,34 +9,34 @@ defmodule HerokuConnector.Heroku do
   Get all Heroku apps for the given `account`.
   """
   def apps(account) do
-    app_service.list(client(account))
+    app_service().list(client(account))
   end
 
   @doc """
   Get the application from the `account` with the given `app_id`.
   """
   def app(account, app_id) do
-    app_service.get(client(account), app_id)
+    app_service().get(client(account), app_id)
   end
 
   # Dynos
 
   def dynos(account, app_id) do
-    dyno_service.list(client(account, app_id))
+    dyno_service().list(client(account, app_id))
   end
 
   # Add-on attachments
 
   def create_addon(account, app_id, addon_id) do
-    addon_service.create(client(account, app_id), %{"plan" => addon_id})
+    addon_service().create(client(account, app_id), %{"plan" => addon_id})
   end
 
   def delete_addon(account, app_id, addon_id) do
-    addon_service.delete(client(account, app_id), addon_id)
+    addon_service().delete(client(account, app_id), addon_id)
   end
 
   def addon_enabled?(account, app_id, addon_id) do
-    case addon_service.get(client(account, app_id), addon_id) do
+    case addon_service().get(client(account, app_id), addon_id) do
       %Happi.Heroku.Error{code: 404} -> false
       _ -> true
     end
@@ -45,48 +45,48 @@ defmodule HerokuConnector.Heroku do
   # SSL Endpoints
 
   def create_ssl_endpoint(account, app_id, certificate_chain, private_key) do
-    ssl_endpoint_service.create(client(account, app_id), %{"certificate_chain" => certificate_chain, "private_key" => private_key})
+    ssl_endpoint_service().create(client(account, app_id), %{"certificate_chain" => certificate_chain, "private_key" => private_key})
   end
 
   def update_ssl_endpoint(account, app_id, certificate_chain, private_key, ssl_endpoint_id) do
     Logger.info("update ssl endpoint #{inspect ssl_endpoint_id} in app #{app_id}")
     params = %{"certificate_chain" => certificate_chain, "private_key" => private_key}
-    result = ssl_endpoint_service.update(client(account, app_id), ssl_endpoint_id, params)
+    result = ssl_endpoint_service().update(client(account, app_id), ssl_endpoint_id, params)
     IO.inspect(result)
   end
 
   def delete_ssl_endpoint(account, app_id, ssl_endpoint_id) do
-    ssl_endpoint_service.delete(client(account, app_id), ssl_endpoint_id)
+    ssl_endpoint_service().delete(client(account, app_id), ssl_endpoint_id)
   end
 
   # SNI Endpoins
 
   def create_sni_endpoint(account, app_id, certificate_chain, private_key) do
-    sni_endpoint_service.create(client(account, app_id), %{"certificate_chain" => certificate_chain, "private_key" => private_key})
+    sni_endpoint_service().create(client(account, app_id), %{"certificate_chain" => certificate_chain, "private_key" => private_key})
   end
 
   def update_sni_endpoint(account, app_id, certificate_chain, private_key, endpoint_id) do
     Logger.info("update ssl endpoint #{inspect endpoint_id} in app #{app_id}")
     params = %{"certificate_chain" => certificate_chain, "private_key" => private_key}
-    result = sni_endpoint_service.update(client(account, app_id), endpoint_id, params)
+    result = sni_endpoint_service().update(client(account, app_id), endpoint_id, params)
     IO.inspect(result)
   end
 
   def delete_sni_endpoint(account, app_id, endpoint_id) do
-    sni_endpoint_service.delete(client(account, app_id), endpoint_id)
+    sni_endpoint_service().delete(client(account, app_id), endpoint_id)
   end
 
   # Domains
 
   def create_domains(account, app_id, hostnames) do
     Enum.map(hostnames, fn(hostname) ->
-      domain_service.create(client(account, app_id), %{"hostname" => hostname})
+      domain_service().create(client(account, app_id), %{"hostname" => hostname})
     end)
   end
 
   def delete_domains(account, app_id, domain_ids) do
     Enum.map(domain_ids, fn(domain_id) ->
-      domain_service.delete(client(account, app_id), domain_id)
+      domain_service().delete(client(account, app_id), domain_id)
     end)
   end
 

@@ -4,13 +4,13 @@ defmodule HerokuConnector.Mixfile do
   def project do
     [app: :heroku_connector,
      version: "0.0.1",
-     elixir: "~> 1.0",
+     elixir: "~> 1.4",
      elixirc_paths: elixirc_paths(Mix.env),
      compilers: [:phoenix, :gettext] ++ Mix.compilers,
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
-     aliases: aliases,
-     deps: deps]
+     aliases: aliases(),
+     deps: deps()]
   end
 
   # Configuration for the OTP application.
@@ -30,7 +30,7 @@ defmodule HerokuConnector.Mixfile do
   #
   # Type `mix help deps` for examples and options.
   defp deps do
-    [{:phoenix, "~> 1.2"},
+    [{:phoenix, "~> 1.0"},
      {:postgrex, "~> 0.11.2"},
      {:phoenix_ecto, "~> 3.0"},
      {:phoenix_html, "~> 2.6.2"},
@@ -38,7 +38,7 @@ defmodule HerokuConnector.Mixfile do
      {:gettext, "~> 0.9"},
      {:cowboy, "~> 1.0"},
      {:dnsimple, "~> 1.0"},
-     {:happi, git: "https://github.com/aeden/happi.git", tag: "0.0.6"},
+     {:happi, git: "https://github.com/aeden/happi.git", tag: "0.0.8"},
      {:oauth2, "~> 0.8"}]
   end
 
