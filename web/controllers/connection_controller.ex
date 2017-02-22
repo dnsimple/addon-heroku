@@ -68,9 +68,10 @@ defmodule HerokuConnector.ConnectionController do
         # TODO: convert to a redirect
         connect(conn, %{"id" => connection.id, "connection" => %{"id" => 0}})
       certificates ->
+        sni_endpoint_permitted = HerokuConnector.Heroku.sni_endpoint_permitted?(account, connection.heroku_app_id)
         domain = HerokuConnector.Dnsimple.domain(account, connection.dnsimple_domain_id)
         changeset = Connection.changeset(connection)
-        render(conn, "connect.html", changeset: changeset, connection: connection, dnsimple_domain: domain, dnsimple_certificates: certificates)
+        render(conn, "connect.html", changeset: changeset, connection: connection, dnsimple_domain: domain, dnsimple_certificates: certificates, sni_endpoint_permitted: sni_endpoint_permitted)
     end
   end
 

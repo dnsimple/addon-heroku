@@ -61,6 +61,12 @@ defmodule HerokuConnector.Heroku do
 
   # SNI Endpoins
 
+  def sni_endpoint_permitted?(account, app_id) do
+    Enum.all?(dynos(account, app_id), fn(dyno) ->
+      String.downcase(dyno.size) != "free"
+    end)
+  end
+
   def create_sni_endpoint(account, app_id, certificate_chain, private_key) do
     sni_endpoint_service().create(client(account, app_id), %{"certificate_chain" => certificate_chain, "private_key" => private_key})
   end
